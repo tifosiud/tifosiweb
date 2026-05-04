@@ -1,59 +1,127 @@
 <h1>Tifosi</h1>
 
+<h2>Próximo partido</h2>
+<div id="proximo"></div>
+
 <h2>Último resultado</h2>
 <img id="img" width="400">
 
 <h2>Clasificación</h2>
-<ul id="clasificacion"></ul>
+<div id="clasificacion"></div>
 
-<h2>Goleadores</h2>
-<ul id="goleadores"></ul>
+<h2>Resultados equipo</h2>
+<ul id="equipo"></ul>
+
+<h2>Resultados liga</h2>
+<ul id="liga"></ul>
 
 <script>
 async function cargarDatos() {
 
-  // ✅ RESULTADO
-  let res = await fetch('data/resultados.json');
+  // =========================
+  // PROXIMO PARTIDO ✅ ARREGLADO
+  // =========================
+  let p = await fetch('data/proximo.json');
+  let proximo = await p.json();
+
+  if (proximo.jornada) {
+    document.getElementById("proximo").innerHTML = `
+      <strong>Jornada ${proximo.jornada}</strong><br>
+      ${proximo.local} vs ${proximo.visitante}<br>
+      ${proximo.fecha} · ${proximo.hora}
+    `;
+  } else {
+    document.getElementById("proximo").innerText = "No definido";
+  }
+
+  // =========================
+  // RESULTADOS EQUIPO
+  // =========================
+  let res = await fetch('data/resultados_equipo.json');
   let resultados = await res.json();
-  let ultimo = resultados[resultados.length - 1];
 
-  document.getElementById("img").src =
-    "imagenes/jornada_" + ultimo.jornada + ".png";
+  if (resultados.length > 0) {
+    let ultimo = resultados[resultados.length - 1];
+    document.getElementById("img").src =
+      "imagenes/jornada_" + ultimo.jornada + ".png";
+  }
 
-  // ✅ CLASIFICACIÓN
-  let resClas = await fetch('data/clasificacion.json');
-  let clas = await resClas.json();
+  let ulEquipo = document.getElementById("equipo");
+  ulEquipo.innerHTML = "";
 
-  clas.sort((a,b) => b.pts - a.pts);
-
-  let ulClas = document.getElementById("clasificacion");
-  ulClas.innerHTML = "";
-
-  clas.forEach(e => {
+  resultados.forEach(r => {
     let li = document.createElement("li");
-    li.innerText = `${e.equipo} - ${e.pts} pts (${e.gf}-${e.gc})`;
-    ulClas.appendChild(li);
+    li.innerText = `${r.local} ${r.goles_local}-${r.goles_visitante} ${r.visitante}`;
+    ulEquipo.appendChild(li);
   });
 
-  // ✅ GOLEADORES
-  let resGol = await fetch('data/goleadores.json');
-  let goles = await resGol.json();
+  // =========================
+  // RESULTADOS LIGA
+  // =========================
+  let ligaRes = await fetch('data/resultados_liga.json');
+  let liga = await ligaRes.json();
 
-  goles.sort((a,b) => b.goles - a.goles);
+  let ulLiga = document.getElementById("liga");
+  ulLiga.innerHTML = "";
 
-  let ulGol = document.getElementById("goleadores");
-  ulGol.innerHTML = "";
-
-  goles.forEach(g => {
+  liga.forEach(r => {
     let li = document.createElement("li");
-    li.innerText = `${g.nombre} - ${g.goles} goles`;
-    ulGol.appendChild(li);
+    li.innerText = `${r.local} ${r.goles_local}-${r.goles_visitante} ${r.visitante}`;
+    ulLiga.appendChild(li);
   });
+
+  // =========================
+  // CLASIFICACIÓN
+  // =========================
+  let clasRes = await fetch('data/clasificacion.json');
+  let clas = await clasRes.json();
+
+  let cont = document.getElementById("clasificacion");
+  cont.innerHTML = "";
+
+  if (Array.isArray(clas)) {
+
+    clas.sort((a,b)=>
+      b.pts - a.pts || (b.gf - b.gc) - (a.gf - a.gc)
+    );
+
+    let table = document.createElement("table");
+    table.border = "1";
+
+    table.innerHTML = `
+      <tr>
+        <th>Equipo</th>
+        <th>PJ</th>
+        <th>G</th>
+        <th>E</th>
+        <th>P</th>
+        <th>GF</th>
+        <th>GC</th>
+        <th>PTS</th>
+      </tr>
+    `;
+
+    clas.forEach(e => {
+      let row = document.createElement("tr");
+
+      row.innerHTML = `
+        <td>${e.equipo}</td>
+        <td>${e.pj}</td>
+        <td>${e.g}</td>
+        <td>${e.e}</td>
+        <td>${e.p}</td>
+        <td>${e.gf}</td>
+        <td>${e.gc}</td>
+        <td>${e.pts}</td>
+      `;
+
+      table.appendChild(row);
+    });
+
+    cont.appendChild(table);
+  }
 }
 
-// 🔁 refresco automático cada 5 segundos
 setInterval(cargarDatos, 5000);
-
-// primera carga
 cargarDatos();
 </script>

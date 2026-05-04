@@ -3,7 +3,7 @@ from telegram.ext import Application, MessageHandler, filters, CommandHandler
 from parser import parse_resultado
 from image_generator import generar
 
-TOKEN = "8768812473:AAGKL-wV_vCm0_poBml5MIxpQO5s55Vm9Sc"  # ⚠️ pon tu token real
+TOKEN = "TU_TOKEN_AQUI"
 
 print("🚀 Iniciando bot...")
 
@@ -16,89 +16,86 @@ async def start(update, context):
 
 
 # =========================
-# MENSAJES DE TEXTO
+# MENSAJES
 # =========================
 async def manejar_texto(update, context):
     texto = update.message.text
     print("📩 Mensaje recibido:", texto)
 
     try:
-        data = parse_resultado(texto)
-
-        # ✅ GENERAR IMAGEN
-        ruta_img = generar(data)
+        tipo = texto[0].upper()
 
         # =========================
-        # ✅ RESULTADOS
+        # A → RESULTADO EQUIPO
         # =========================
-        with open("data/resultados.json", "r+") as f:
-            datos = json.load(f)
-            datos.append(data)
-            f.seek(0)
-            json.dump(datos, f, indent=2)
+        if tipo == "A":
+            data = parse_resultado(texto[2:])
+            ruta_img = generar(data)
 
-        # =========================
-        # ✅ GOLEADORES
-        # =========================
-        with open("data/goleadores.json", "r+") as f:
-            ranking = json.load(f)
+            with open("data/resultados_equipo.json", "r+") as f:
+                datos = json.load(f)
+                datos.append(data)
+                f.seek(0)
+                json.dump(datos, f, indent=2)
 
-            for nombre, goles in data["goleadores"]:
-                encontrado = False
-
-                for j in ranking:
-                    if j["nombre"] == nombre:
-                        j["goles"] += goles
-                        encontrado = True
-
-                if not encontrado:
-                    ranking.append({
-                        "nombre": nombre,
-                        "goles": goles
-                    })
-
-            f.seek(0)
-            json.dump(ranking, f, indent=2)
+            await update.message.reply_photo(photo=open(ruta_img, "rb"))
 
         # =========================
-        # ✅ CLASIFICACIÓN
+        # C → RESULTADOS LIGA
         # =========================
-        with open("data/clasificacion.json", "r+") as f:
-            tabla = json.load(f)
+        elif tipo == "C":
+            data = parse_resultado(texto[2:])
 
-            def actualizar(equipo, gf, gc):
+            with open("data/resultados_liga.json", "r+") as f:
+                liga = json.load(f)
+                liga.append(data)
+                f.seek(0)
+                json.dump(liga, f, indent=2)
 
-                for t in tabla:
-                    if t["equipo"] == equipo:
-                        t["pj"] += 1
-                        t["gf"] += gf
-                        t["gc"] += gc
-
-                        if gf > gc:
-                            t["pts"] += 3
-                        elif gf == gc:
-                            t["pts"] += 1
-                        return
-
-                # nuevo equipo
-                tabla.append({
-                    "equipo": equipo,
-                    "pj": 1,
-                    "gf": gf,
-                    "gc": gc,
-                    "pts": 3 if gf > gc else 1 if gf == gc else 0
-                })
-
-            actualizar(data["local"], data["goles_local"], data["goles_visitante"])
-            actualizar(data["visitante"], data["goles_visitante"], data["goles_local"])
-
-            f.seek(0)
-            json.dump(tabla, f, indent=2)
+            await update.message.reply_text("Resultado de liga guardado ✅")
 
         # =========================
-        # ✅ RESPUESTA BOT
+        # B → CLASIFICACIÓN
         # =========================
-        await update.message.reply_photo(photo=open(ruta_img, "rb"))
+        elif tipo == "B":
+            data = json.loads(texto[2:])
+
+            with open("data/clasificacion.json", "w") as f:
+                json.dump(data, f, indent=2)
+
+            await update.message.reply_text("Clasificación actualizada ✅")
+
+        # =========================
+        # P → PRÓXIMO PARTIDO ✅ NUEVO
+        # =========================
+        elif tipo == "P":
+            # Formato: P J1 Tifosi - Lanceros 10:00
+            partes = texto.split(" ")
+
+            jornada = int(partes[1][1:])  # J1 -> 1
+            local = partes[2]
+            visitante = partes[4]
+            hora = partes[5]
+
+            # leer fechas desde jornadas.json
+            with open("data/jornadas.json", "r") as f:
+                jornadas = json.load(f)
+
+            fecha = jornadas.get(str(jornada), "Fecha no definida")
+
+            with open("data/proximo.json", "w") as f:
+                json.dump({
+                    "jornada": jornada,
+                    "fecha": fecha,
+                    "hora": hora,
+                    "local": local,
+                    "visitante": visitante
+                }, f, indent=2)
+
+            await update.message.reply_text("Próximo partido actualizado ✅")
+
+        else:
+            await update.message.reply_text("Formato no reconocido")
 
     except Exception as e:
         print("❌ Error:", e)
