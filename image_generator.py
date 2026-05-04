@@ -47,7 +47,7 @@ def generar(data):
     # =========================
     # IMAGEN BASE
     # =========================
-    img = Image.open("web/imagenes/plantilla.png").convert("RGBA")
+    img = Image.open("plantilla.png").convert("RGBA")
     draw = ImageDraw.Draw(img)
 
     ancho, alto = img.size
@@ -73,12 +73,12 @@ def generar(data):
     # =========================
     # FUENTES
     # =========================
-    font_titulo = ImageFont.truetype("web/fonts/Bauman-Regular.ttf", int(ancho * 0.08))
-    font_estado = ImageFont.truetype("web/fonts/Bauman-Regular.ttf", int(ancho * 0.12))
-    font_marcador = ImageFont.truetype("web/fonts/Bauman-Regular.ttf", int(ancho * 0.40))
-    font_equipo = ImageFont.truetype("web/fonts/Bauman-Regular.ttf", int(ancho * 0.07))
-    font_goleadores = ImageFont.truetype("web/fonts/Bauman-Regular.ttf", int(ancho * 0.045))
-    font_jornada = ImageFont.truetype("web/fonts/Bauman-Regular.ttf", int(ancho * 0.055))
+    font_titulo = ImageFont.truetype("fonts/Bauman-Regular.ttf", int(ancho * 0.08))
+    font_estado = ImageFont.truetype("fonts/Bauman-Regular.ttf", int(ancho * 0.12))
+    font_marcador = ImageFont.truetype("fonts/Bauman-Regular.ttf", int(ancho * 0.40))
+    font_equipo = ImageFont.truetype("fonts/Bauman-Regular.ttf", int(ancho * 0.07))
+    font_goleadores = ImageFont.truetype("fonts/Bauman-Regular.ttf", int(ancho * 0.045))
+    font_jornada = ImageFont.truetype("fonts/Bauman-Regular.ttf", int(ancho * 0.055))
 
     # =========================
     # CABECERA
@@ -93,7 +93,7 @@ def generar(data):
     # =========================
     # ESCUDO
     # =========================
-    escudo = Image.open("web/imagenes/escudo.png").convert("RGBA")
+    escudo = Image.open("escudo.png").convert("RGBA")
     escudo_size = int(ancho * 0.18)
     escudo = escudo.resize((escudo_size, escudo_size), Image.LANCZOS)
 
@@ -221,18 +221,18 @@ def generar(data):
     # =========================
     # EXPORTAR
     # =========================
-    ruta = f"web/imagenes/jornada_{data['jornada']}.png"
+    ruta = f"imagenes/jornada_{data['jornada']}.png"
     
     # Guardado principal
     img.save(ruta)
 
     # 📱 versión cuadrada Instagram
     img_square = img.resize((1080, 1080))
-    img_square.save(f"web/imagenes/jornada_{data['jornada']}_ig.png")
+    img_square.save(f"imagenes/jornada_{data['jornada']}_ig.png")
 
     # 📲 versión story (vertical)
     img_story = img.resize((1080, 1920))
-    img_story.save(f"web/imagenes/jornada_{data['jornada']}_story.png")
+    img_story.save(f"imagenes/jornada_{data['jornada']}_story.png")
 
 
     return ruta

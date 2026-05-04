@@ -3,7 +3,7 @@ from telegram.ext import Application, MessageHandler, filters, CommandHandler
 from parser import parse_resultado
 from image_generator import generar
 
-TOKEN = "TU_TOKEN_AQUI"
+TOKEN = "8768812473:AAGKL-wV_vCm0_poBml5MIxpQO5s55Vm9Sc"
 
 print("🚀 Iniciando bot...")
 
