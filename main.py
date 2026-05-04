@@ -1,4 +1,5 @@
 import json
+import os
 from telegram.ext import Application, MessageHandler, filters, CommandHandler
 from parser import parse_resultado
 from image_generator import generar
@@ -96,6 +97,10 @@ async def manejar_texto(update, context):
 
         else:
             await update.message.reply_text("Formato no reconocido")
+
+        os.system("git add .")
+        os.system('git commit -m "update web"')
+        os.system("git push")
 
     except Exception as e:
         print("❌ Error:", e)

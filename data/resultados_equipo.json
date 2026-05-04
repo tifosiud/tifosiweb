@@ -1,3 +1,19 @@
 [
-  
+  {
+    "jornada": 1,
+    "local": "Tifosi",
+    "visitante": "Lanceros",
+    "goles_local": 3,
+    "goles_visitante": 2,
+    "goleadores": [
+      [
+        "Victor",
+        2
+      ],
+      [
+        "Ricky",
+        1
+      ]
+    ]
+  }
 ]
