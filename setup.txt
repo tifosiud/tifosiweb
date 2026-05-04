@@ -1,0 +1,8 @@
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+______
+
+abrir sin cerrar - nohup python main.py &
+abrir bot - python main.py
