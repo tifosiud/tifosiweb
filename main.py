@@ -4,21 +4,15 @@ from telegram.ext import Application, MessageHandler, filters, CommandHandler
 from parser import parse_resultado
 from image_generator import generar
 
-TOKEN = "8768812473:AAGKL-wV_vCm0_poBml5MIxpQO5s55Vm9Sc"
+TOKEN = "TU_TOKEN_AQUI"
 
 print("🚀 Iniciando bot...")
 
 
-# =========================
-# COMANDO /start
-# =========================
 async def start(update, context):
     await update.message.reply_text("Bot activo ✅")
 
 
-# =========================
-# MENSAJES
-# =========================
 async def manejar_texto(update, context):
     texto = update.message.text
     print("📩 Mensaje recibido:", texto)
@@ -67,18 +61,17 @@ async def manejar_texto(update, context):
             await update.message.reply_text("Clasificación actualizada ✅")
 
         # =========================
-        # P → PRÓXIMO PARTIDO ✅ NUEVO
+        # P → PRÓXIMO PARTIDO
         # =========================
         elif tipo == "P":
-            # Formato: P J1 Tifosi - Lanceros 10:00
+
             partes = texto.split(" ")
 
-            jornada = int(partes[1][1:])  # J1 -> 1
+            jornada = int(partes[1][1:])
             local = partes[2]
             visitante = partes[4]
             hora = partes[5]
 
-            # leer fechas desde jornadas.json
             with open("data/jornadas.json", "r") as f:
                 jornadas = json.load(f)
 
@@ -98,8 +91,11 @@ async def manejar_texto(update, context):
         else:
             await update.message.reply_text("Formato no reconocido")
 
+        # =========================
+        # AUTO UPDATE WEB (SEGURA)
+        # =========================
         os.system("git add .")
-        os.system('git commit -m "update web"')
+        os.system('git diff --cached --quiet || git commit -m "update web"')
         os.system("git push")
 
     except Exception as e:
@@ -107,11 +103,7 @@ async def manejar_texto(update, context):
         await update.message.reply_text("Error procesando el mensaje")
 
 
-# =========================
-# CONFIG BOT
-# =========================
 app = Application.builder().token(TOKEN).build()
-
 app.add_handler(CommandHandler("start", start))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, manejar_texto))
 

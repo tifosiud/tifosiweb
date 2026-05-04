@@ -1,227 +1,147 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Tifosi</title>
+<meta charset="UTF-8">
+<title>Tifosi</title>
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f2f2f2;
-      margin: 0;
-      padding: 0;
-      text-align: center;
-    }
+<style>
+body { font-family: Arial; background:#f2f2f2; margin:0; text-align:center;}
+h1 { background:#1565c0; color:white; padding:20px; margin:0;}
+.container { max-width:500px; margin:auto; padding:10px;}
 
-    h1 {
-      background: #1565c0;
-      color: white;
-      padding: 20px;
-      margin: 0;
-    }
+.card { background:white; border-radius:15px; padding:15px; margin:15px 0;
+box-shadow:0 4px 10px rgba(0,0,0,0.1); }
 
-    .container {
-      max-width: 500px;
-      margin: auto;
-      padding: 10px;
-    }
+.match { font-size:18px; font-weight:bold;}
+.date { color:#777;}
 
-    /* TARJETAS */
-    .card {
-      background: white;
-      border-radius: 15px;
-      padding: 15px;
-      margin: 15px 0;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
+img { width:100%; border-radius:12px;}
 
-    .match {
-      font-size: 18px;
-      font-weight: bold;
-    }
+table { width:100%; border-collapse:collapse;}
+th { background:#1565c0; color:white; padding:8px;}
+td { padding:6px; border-bottom:1px solid #ddd;}
 
-    .date {
-      color: #777;
-      font-size: 14px;
-    }
+.tifosi { background:#cfe3ff !important; font-weight:bold;}
 
-    img {
-      width: 100%;
-      border-radius: 12px;
-    }
+ul { list-style:none; padding:0;}
+li { background:white; margin:5px 0; padding:10px;
+border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,.1);}
+</style>
 
-    /* TABLA */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-    }
-
-    th {
-      background: #1565c0;
-      color: white;
-      padding: 8px;
-    }
-
-    td {
-      padding: 6px;
-      border-bottom: 1px solid #ddd;
-    }
-
-    tr:nth-child(even) {
-      background: #f9f9f9;
-    }
-
-    .tifosi {
-      background: #cfe3ff !important;
-      font-weight: bold;
-    }
-
-    /* LISTAS */
-    ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    li {
-      background: white;
-      margin: 5px 0;
-      padding: 10px;
-      border-radius: 10px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-  </style>
 </head>
-
 <body>
 
 <h1>Tifosi</h1>
 
 <div class="container">
 
-  <!-- PROXIMO PARTIDO -->
-  <div class="card">
-    <h3>Próximo partido</h3>
-    <div id="proximo"></div>
-  </div>
+<div class="card">
+<h3>Próximo partido</h3>
+<div id="proximo"></div>
+</div>
 
-  <!-- ULTIMO RESULTADO -->
-  <div class="card">
-    <h3>Último resultado</h3>
-    <img id="img">
-  </div>
+<div class="card">
+<h3>Último resultado</h3>
+<img id="img">
+</div>
 
-  <!-- CLASIFICACION -->
-  <div class="card">
-    <h3>Clasificación</h3>
-    <div id="clasificacion"></div>
-  </div>
+<div class="card">
+<h3>Clasificación</h3>
+<div id="clasificacion"></div>
+</div>
 
-  <!-- RESULTADOS EQUIPO -->
-  <div class="card">
-    <h3>Resultados equipo</h3>
-    <ul id="equipo"></ul>
-  </div>
+<div class="card">
+<h3>Resultados equipo</h3>
+<ul id="equipo"></ul>
+</div>
 
-  <!-- RESULTADOS LIGA -->
-  <div class="card">
-    <h3>Resultados liga</h3>
-    <ul id="liga"></ul>
-  </div>
+<div class="card">
+<h3>Resultados liga</h3>
+<ul id="liga"></ul>
+</div>
 
 </div>
 
 <script>
-async function cargarDatos() {
+async function getJSON(url){
+  try{
+    let r = await fetch(url + "?t=" + Date.now());
+    return await r.json();
+  }catch(e){
+    console.log("Error en", url);
+    return null;
+  }
+}
 
-  // =========================
-  // PROXIMO PARTIDO
-  // =========================
-  let p = await fetch('data/proximo.json');
-  let proximo = await p.json();
+async function cargarDatos(){
 
-  if (proximo.jornada) {
-    document.getElementById("proximo").innerHTML =
-      "<div class='match'>" + proximo.local + " vs " + proximo.visitante + "</div>" +
-      "<div class='date'>Jornada " + proximo.jornada + " · " + proximo.fecha + " · " + proximo.hora + "</div>";
-  } else {
-    document.getElementById("proximo").innerText = "No definido";
+  // PROXIMO
+  let proximo = await getJSON('data/proximo.json');
+  let div = document.getElementById("proximo");
+
+  if(proximo && proximo.jornada){
+    div.innerHTML =
+      `<div class="match">${proximo.local} vs ${proximo.visitante}</div>
+       <div class="date">J${proximo.jornada} · ${proximo.fecha} · ${proximo.hora}</div>`;
+  }else{
+    div.innerText = "No definido";
   }
 
-  // =========================
   // RESULTADOS EQUIPO
-  // =========================
-  let res = await fetch('data/resultados_equipo.json');
-  let resultados = await res.json();
+  let resultados = await getJSON('data/resultados_equipo.json') || [];
 
-  if (resultados.length > 0) {
-    let ultimo = resultados[resultados.length - 1];
+  if(resultados.length){
+    let ultimo = resultados[resultados.length -1];
     document.getElementById("img").src =
       "imagenes/jornada_" + ultimo.jornada + ".png";
   }
 
-  let ulEquipo = document.getElementById("equipo");
-  ulEquipo.innerHTML = "";
-
-  resultados.slice().reverse().forEach(r => {
+  let ul = document.getElementById("equipo");
+  ul.innerHTML = "";
+  resultados.slice().reverse().forEach(r=>{
     let li = document.createElement("li");
-    li.innerText = r.local + " " + r.goles_local + "-" + r.goles_visitante + " " + r.visitante;
-    ulEquipo.appendChild(li);
+    li.innerText = `${r.local} ${r.goles_local}-${r.goles_visitante} ${r.visitante}`;
+    ul.appendChild(li);
   });
 
-  // =========================
-  // RESULTADOS LIGA
-  // =========================
-  let ligaRes = await fetch('data/resultados_liga.json');
-  let liga = await ligaRes.json();
+  // LIGA
+  let liga = await getJSON('data/resultados_liga.json') || [];
+  let ul2 = document.getElementById("liga");
+  ul2.innerHTML = "";
 
-  let ulLiga = document.getElementById("liga");
-  ulLiga.innerHTML = "";
-
-  liga.slice().reverse().forEach(r => {
+  liga.slice().reverse().forEach(r=>{
     let li = document.createElement("li");
-    li.innerText = r.local + " " + r.goles_local + "-" + r.goles_visitante + " " + r.visitante;
-    ulLiga.appendChild(li);
+    li.innerText = `${r.local} ${r.goles_local}-${r.goles_visitante} ${r.visitante}`;
+    ul2.appendChild(li);
   });
 
-  // =========================
   // CLASIFICACION
-  // =========================
-  let clasRes = await fetch('data/clasificacion.json');
-  let clas = await clasRes.json();
+  let clas = await getJSON('data/clasificacion.json') || [];
 
   let cont = document.getElementById("clasificacion");
   cont.innerHTML = "";
 
-  if (Array.isArray(clas)) {
+  if(Array.isArray(clas) && clas.length){
 
-    clas.sort((a,b)=>
-      b.pts - a.pts || (b.gf - b.gc) - (a.gf - a.gc)
-    );
+    clas.sort((a,b)=> b.pts - a.pts);
 
     let table = document.createElement("table");
 
     table.innerHTML =
-      "<tr>" +
-      "<th>#</th>" +
-      "<th>Equipo</th>" +
-      "<th>PJ</th>" +
-      "<th>PTS</th>" +
-      "</tr>";
+      "<tr><th>#</th><th>Equipo</th><th>PJ</th><th>PTS</th></tr>";
 
-    clas.forEach((e,i) => {
+    clas.forEach((e,i)=>{
       let row = document.createElement("tr");
 
-      if (e.equipo === "Tifosi") {
+      if(e.equipo==="Tifosi"){
         row.classList.add("tifosi");
       }
 
       row.innerHTML =
-        "<td>" + (i+1) + "</td>" +
-        "<td>" + e.equipo + "</td>" +
-        "<td>" + e.pj + "</td>" +
-        "<td>" + e.pts + "</td>";
+        `<td>${i+1}</td>
+         <td>${e.equipo}</td>
+         <td>${e.pj}</td>
+         <td>${e.pts}</td>`;
 
       table.appendChild(row);
     });
@@ -230,7 +150,7 @@ async function cargarDatos() {
   }
 }
 
-setInterval(cargarDatos, 5000);
+setInterval(cargarDatos,5000);
 cargarDatos();
 </script>
 
