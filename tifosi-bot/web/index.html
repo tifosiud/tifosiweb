@@ -1,0 +1,59 @@
+<h1>Tifosi</h1>
+
+<h2>Último resultado</h2>
+<img id="img" width="400">
+
+<h2>Clasificación</h2>
+<ul id="clasificacion"></ul>
+
+<h2>Goleadores</h2>
+<ul id="goleadores"></ul>
+
+<script>
+async function cargarDatos() {
+
+  // ✅ RESULTADO
+  let res = await fetch('data/resultados.json');
+  let resultados = await res.json();
+  let ultimo = resultados[resultados.length - 1];
+
+  document.getElementById("img").src =
+    "imagenes/jornada_" + ultimo.jornada + ".png";
+
+  // ✅ CLASIFICACIÓN
+  let resClas = await fetch('data/clasificacion.json');
+  let clas = await resClas.json();
+
+  clas.sort((a,b) => b.pts - a.pts);
+
+  let ulClas = document.getElementById("clasificacion");
+  ulClas.innerHTML = "";
+
+  clas.forEach(e => {
+    let li = document.createElement("li");
+    li.innerText = `${e.equipo} - ${e.pts} pts (${e.gf}-${e.gc})`;
+    ulClas.appendChild(li);
+  });
+
+  // ✅ GOLEADORES
+  let resGol = await fetch('data/goleadores.json');
+  let goles = await resGol.json();
+
+  goles.sort((a,b) => b.goles - a.goles);
+
+  let ulGol = document.getElementById("goleadores");
+  ulGol.innerHTML = "";
+
+  goles.forEach(g => {
+    let li = document.createElement("li");
+    li.innerText = `${g.nombre} - ${g.goles} goles`;
+    ulGol.appendChild(li);
+  });
+}
+
+// 🔁 refresco automático cada 5 segundos
+setInterval(cargarDatos, 5000);
+
+// primera carga
+cargarDatos();
+</script>

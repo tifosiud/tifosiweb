@@ -1,0 +1,57 @@
+[
+  {
+    "jornada": 1,
+    "local": "Tifosi",
+    "visitante": "Lanceros",
+    "goles_local": 3,
+    "goles_visitante": 2,
+    "goleadores": [
+      [
+        "Victor",
+        2
+      ],
+      [
+        "Ricky",
+        1
+      ]
+    ]
+  },
+  {
+    "jornada": 2,
+    "local": "Parraras",
+    "visitante": "Tifosi",
+    "goles_local": 6,
+    "goles_visitante": 3,
+    "goleadores": [
+      [
+        "Victor",
+        2
+      ],
+      [
+        "Ricky",
+        1
+      ]
+    ]
+  },
+  {
+    "jornada": 3,
+    "local": "Tifosi",
+    "visitante": "Rayo",
+    "goles_local": 5,
+    "goles_visitante": 5,
+    "goleadores": [
+      [
+        "Victor",
+        2
+      ],
+      [
+        "Ricky",
+        1
+      ],
+      [
+        "Said",
+        2
+      ]
+    ]
+  }
+]
