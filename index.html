@@ -1,34 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Tifosi</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+
+    h1 {
+      background: #1565c0;
+      color: white;
+      padding: 20px;
+      margin: 0;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: auto;
+      padding: 10px;
+    }
+
+    /* TARJETA */
+    .card {
+      background: white;
+      border-radius: 15px;
+      padding: 15px;
+      margin: 15px 0;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    /* PROXIMO PARTIDO */
+    .match {
+      font-size: 18px;
+      font-weight: bold;
+      margin: 5px 0;
+    }
+
+    .date {
+      color: #777;
+      font-size: 14px;
+    }
+
+    /* IMAGEN */
+    img {
+      width: 100%;
+      border-radius: 12px;
+    }
+
+    /* TABLA CLASIFICACION */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    th {
+      background: #1565c0;
+      color: white;
+      padding: 8px;
+    }
+
+    td {
+      padding: 6px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    tr:nth-child(even) {
+      background: #f9f9f9;
+    }
+
+    .tifosi {
+      background: #cfe3ff !important;
+      font-weight: bold;
+    }
+
+    /* RESULTADOS */
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    li {
+      background: white;
+      margin: 5px 0;
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+
+<body>
+
 <h1>Tifosi</h1>
 
-<h2>Próximo partido</h2>
-<div id="proximo"></div>
+<div class="container">
 
-<h2>Último resultado</h2>
-<img id="img" width="400">
+  <!-- PROXIMO PARTIDO -->
+  <div class="card">
+    <h3>Próximo partido</h3>
+    <div id="proximo"></div>
+  </div>
 
-<h2>Clasificación</h2>
-<div id="clasificacion"></div>
+  <!-- ULTIMO RESULTADO -->
+  <div class="card">
+    <h3>Último resultado</h3>
+    <img id="img">
+  </div>
 
-<h2>Resultados equipo</h2>
-<ul id="equipo"></ul>
+  <!-- CLASIFICACION -->
+  <div class="card">
+    <h3>Clasificación</h3>
+    <div id="clasificacion"></div>
+  </div>
 
-<h2>Resultados liga</h2>
-<ul id="liga"></ul>
+  <!-- RESULTADOS EQUIPO -->
+  <div class="card">
+    <h3>Resultados equipo</h3>
+    <ul id="equipo"></ul>
+  </div>
+
+  <!-- RESULTADOS LIGA -->
+  <div class="card">
+    <h3>Resultados liga</h3>
+    <ul id="liga"></ul>
+  </div>
+
+</div>
 
 <script>
 async function cargarDatos() {
 
   // =========================
-  // PROXIMO PARTIDO ✅ ARREGLADO
+  // PROXIMO PARTIDO
   // =========================
   let p = await fetch('data/proximo.json');
   let proximo = await p.json();
 
   if (proximo.jornada) {
     document.getElementById("proximo").innerHTML = `
-      <strong>Jornada ${proximo.jornada}</strong><br>
-      ${proximo.local} vs ${proximo.visitante}<br>
-      ${proximo.fecha} · ${proximo.hora}
+      <div class="match">${proximo.local} vs ${proximo.visitante}</div>
+      <div class="date">
+        Jornada ${proximo.jornada} · ${proximo.fecha} · ${proximo.hora}
+      </div>
     `;
   } else {
     document.getElementById("proximo").innerText = "No definido";
@@ -49,7 +170,7 @@ async function cargarDatos() {
   let ulEquipo = document.getElementById("equipo");
   ulEquipo.innerHTML = "";
 
-  resultados.forEach(r => {
+  resultados.reverse().forEach(r => {
     let li = document.createElement("li");
     li.innerText = `${r.local} ${r.goles_local}-${r.goles_visitante} ${r.visitante}`;
     ulEquipo.appendChild(li);
@@ -64,14 +185,14 @@ async function cargarDatos() {
   let ulLiga = document.getElementById("liga");
   ulLiga.innerHTML = "";
 
-  liga.forEach(r => {
+  liga.reverse().forEach(r => {
     let li = document.createElement("li");
     li.innerText = `${r.local} ${r.goles_local}-${r.goles_visitante} ${r.visitante}`;
     ulLiga.appendChild(li);
   });
 
   // =========================
-  // CLASIFICACIÓN
+  // CLASIFICACION
   // =========================
   let clasRes = await fetch('data/clasificacion.json');
   let clas = await clasRes.json();
@@ -79,49 +200,44 @@ async function cargarDatos() {
   let cont = document.getElementById("clasificacion");
   cont.innerHTML = "";
 
-  if (Array.isArray(clas)) {
+  clas.sort((a,b)=>
+    b.pts - a.pts || (b.gf - b.gc) - (a.gf - a.gc)
+  );
 
-    clas.sort((a,b)=>
-      b.pts - a.pts || (b.gf - b.gc) - (a.gf - a.gc)
-    );
+  let table = document.createElement("table");
 
-    let table = document.createElement("table");
-    table.border = "1";
+  table.innerHTML = `
+    <tr>
+      <th>#</th>
+      <th>Equipo</th>
+      <th>PJ</th>
+      <th>PTS</th>
+    </tr>
+  `;
 
-    table.innerHTML = `
-      <tr>
-        <th>Equipo</th>
-        <th>PJ</th>
-        <th>G</th>
-        <th>E</th>
-        <th>P</th>
-        <th>GF</th>
-        <th>GC</th>
-        <th>PTS</th>
-      </tr>
+  clas.forEach((e,i) => {
+    let row = document.createElement("tr");
+
+    if (e.equipo === "Tifosi") {
+      row.classList.add("tifosi");
+    }
+
+    row.innerHTML = `
+      <td>${i+1}</td>
+      <td>${e.equipo}</td>
+      <td>${e.pj}</td>
+      <td>${e.pts}</td>
     `;
 
-    clas.forEach(e => {
-      let row = document.createElement("tr");
+    table.appendChild(row);
+  });
 
-      row.innerHTML = `
-        <td>${e.equipo}</td>
-        <td>${e.pj}</td>
-        <td>${e.g}</td>
-        <td>${e.e}</td>
-        <td>${e.p}</td>
-        <td>${e.gf}</td>
-        <td>${e.gc}</td>
-        <td>${e.pts}</td>
-      `;
-
-      table.appendChild(row);
-    });
-
-    cont.appendChild(table);
-  }
+  cont.appendChild(table);
 }
 
 setInterval(cargarDatos, 5000);
 cargarDatos();
 </script>
+
+</body>
+</html>
