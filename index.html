@@ -85,12 +85,13 @@ async function cargarDatos(){
 
   if(proximo && proximo.jornada){
     div.innerHTML = "";
+    div.appendChild(imgProximo);
     imgProximo.src = "imagenes/proximo_jornada_" + proximo.jornada + ".png";
     imgProximo.style.display = "block";
   }else{
-    div.innerText = "No definido";
     imgProximo.style.display = "none";
     imgProximo.src = "";
+    div.innerText = "No definido";
   }
 
   // RESULTADOS EQUIPO
