@@ -11,6 +11,16 @@ def normalize_text(texto):
     texto = ''.join(ch for ch in texto if unicodedata.category(ch) != 'Mn')
     return texto.replace('Ñ', 'N').replace('ñ', 'n')
 
+
+def abbreviate_team(name):
+    parts = name.strip().split()
+    if len(parts) <= 1:
+        return name
+    second = ''.join(ch for ch in parts[1] if ch.isalnum())[:2]
+    if not second:
+        return parts[0]
+    return f"{parts[0]} {second}."
+
 # =========================
 # FUNCIONES DE CENTRADO
 # =========================
@@ -408,18 +418,27 @@ def generar_clasificacion(jornada, clasificacion):
     draw.rectangle([(0, 0), (ancho, 140)], fill="#1565c0")
     draw.text((40, 40), normalize_text(f"Clasificación J{jornada}"), fill="white", font=title_font)
 
-    x_pos = [50, 140, 700, 920]
+    x_pos = [50, 120, 380, 520, 620, 720, 820, 920]
     draw.text((x_pos[0], 180), "#", fill="#333333", font=header_font)
     draw.text((x_pos[1], 180), "Equipo", fill="#333333", font=header_font)
     draw.text((x_pos[2], 180), "J", fill="#333333", font=header_font)
-    draw.text((x_pos[3], 180), "Pts", fill="#333333", font=header_font)
+    draw.text((x_pos[3], 180), "G", fill="#333333", font=header_font)
+    draw.text((x_pos[4], 180), "E", fill="#333333", font=header_font)
+    draw.text((x_pos[5], 180), "P", fill="#333333", font=header_font)
+    draw.text((x_pos[6], 180), "DIF", fill="#333333", font=header_font)
+    draw.text((x_pos[7], 180), "Pts", fill="#333333", font=header_font)
 
     y = 240
     for item in clasificacion:
+        dif = item.get("dif") if item.get("dif") is not None else item.get("favor", 0) - item.get("contra", 0)
         draw.text((x_pos[0], y), str(item["pos"]), fill="#111111", font=row_font)
-        draw.text((x_pos[1], y), normalize_text(item["equipo"]), fill="#111111", font=row_font)
+        draw.text((x_pos[1], y), normalize_text(abbreviate_team(item["equipo"])), fill="#111111", font=row_font)
         draw.text((x_pos[2], y), str(item["pj"]), fill="#111111", font=row_font)
-        draw.text((x_pos[3], y), str(item["pts"]), fill="#111111", font=row_font)
+        draw.text((x_pos[3], y), str(item.get("g", 0)), fill="#111111", font=row_font)
+        draw.text((x_pos[4], y), str(item.get("e", 0)), fill="#111111", font=row_font)
+        draw.text((x_pos[5], y), str(item.get("p", 0)), fill="#111111", font=row_font)
+        draw.text((x_pos[6], y), str(dif), fill="#111111", font=row_font)
+        draw.text((x_pos[7], y), str(item.get("pts", 0)), fill="#111111", font=row_font)
         y += 70
 
     jornada_label = f"j{jornada}"

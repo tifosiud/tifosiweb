@@ -82,6 +82,7 @@ def parse_clasificacion_text(texto):
             if len(trailing) >= 5:
                 p = int(trailing[3])
 
+        dif = favor - contra
         clasificacion.append({
             "pos": pos,
             "equipo": equipo,
@@ -91,6 +92,7 @@ def parse_clasificacion_text(texto):
             "p": p,
             "favor": favor,
             "contra": contra,
+            "dif": dif,
             "pts": pts
         })
 

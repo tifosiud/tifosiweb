@@ -135,7 +135,16 @@ async function cargarDatos(){
     let table = document.createElement("table");
 
     table.innerHTML =
-      "<tr><th>#</th><th>Equipo</th><th>PJ</th><th>PTS</th></tr>";
+      "<tr><th>#</th><th>Equipo</th><th>PJ</th><th>G</th><th>E</th><th>P</th><th>DIF</th><th>PTS</th></tr>";
+
+    function abbreviateTeam(name) {
+      let parts = name.trim().split(/\s+/).filter(Boolean);
+      if (parts.length <= 1) return name;
+      let second = parts[1].replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9]/g, '');
+      second = second.slice(0, 2);
+      if (!second) return parts[0];
+      return `${parts[0]} ${second}.`;
+    }
 
     clas.forEach((e,i)=>{
       let row = document.createElement("tr");
@@ -146,8 +155,12 @@ async function cargarDatos(){
 
       row.innerHTML =
         `<td>${i+1}</td>
-         <td>${e.equipo}</td>
+         <td>${abbreviateTeam(e.equipo)}</td>
          <td>${e.pj}</td>
+         <td>${e.g || 0}</td>
+         <td>${e.e || 0}</td>
+         <td>${e.p || 0}</td>
+         <td>${typeof e.dif !== 'undefined' ? e.dif : (e.favor && e.contra ? e.favor - e.contra : 0)}</td>
          <td>${e.pts}</td>`;
 
       table.appendChild(row);
