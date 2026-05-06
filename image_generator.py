@@ -321,8 +321,8 @@ def generar_proximo(data):
     y_jornada = int(alto * 0.10)
     y_fecha = int(alto * 0.20)
     y_equipos = int(alto * 0.35)
-    y_escudo = int(alto * 0.55)
-    y_ubicacion = int(alto * 0.83)
+    y_escudo = int(alto * 0.80)
+    y_ubicacion = int(alto * 0.90)
 
     # =========================
     # FUENTES
@@ -342,7 +342,7 @@ def generar_proximo(data):
     spacing = int(alto * 0.06)
     center_text(draw, img, equipo_local.upper(), font_equipo, y_equipos - spacing, COLOR_BEIGE)
     center_text(draw, img, "\nVS", font_equipo, y_equipos, COLOR_BEIGE)
-    center_text(draw, img, "\n" + equipo_visitante.upper(), font_equipo, y_equipos + spacing, COLOR_BEIGE)
+    center_text(draw, img, "\n\n" + equipo_visitante.upper(), font_equipo, y_equipos + spacing, COLOR_BEIGE)
 
     # =========================
     # ESCUDO
