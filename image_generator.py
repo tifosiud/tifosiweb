@@ -318,18 +318,18 @@ def generar_proximo(data):
     # =========================
     # POSICIONES
     # =========================
-    y_jornada = int(alto * 0.08)
-    y_fecha = int(alto * 0.18)
-    y_equipos = int(alto * 0.32)
-    y_escudo = int(alto * 0.52)
-    y_ubicacion = int(alto * 0.80)
+    y_jornada = int(alto * 0.10)
+    y_fecha = int(alto * 0.20)
+    y_equipos = int(alto * 0.35)
+    y_escudo = int(alto * 0.55)
+    y_ubicacion = int(alto * 0.83)
 
     # =========================
     # FUENTES
     # =========================
     font_jornada = ImageFont.truetype("fonts/Bauman-Regular.ttf", int(ancho * 0.055))
     font_fecha = ImageFont.truetype("fonts/Bauman-Regular.ttf", int(ancho * 0.062))
-    font_equipo = ImageFont.truetype("fonts/Bauman-Regular.ttf", int(ancho * 0.095))
+    font_equipo = ImageFont.truetype("fonts/Bauman-Regular.ttf", int(ancho * 0.105))
     font_ubicacion = ImageFont.truetype("fonts/Bauman-Regular.ttf", int(ancho * 0.042))
 
     # =========================
