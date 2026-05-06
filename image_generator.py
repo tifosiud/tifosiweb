@@ -341,8 +341,8 @@ def generar_proximo(data):
     # Equipos en líneas separadas centradas
     spacing = int(alto * 0.06)
     center_text(draw, img, equipo_local.upper(), font_equipo, y_equipos - spacing, COLOR_BEIGE)
-    center_text(draw, img, "\nVS\n", font_equipo, y_equipos, COLOR_BEIGE)
-    center_text(draw, img, equipo_visitante.upper(), font_equipo, y_equipos + spacing, COLOR_BEIGE)
+    center_text(draw, img, "\nVS", font_equipo, y_equipos, COLOR_BEIGE)
+    center_text(draw, img, "\n" + equipo_visitante.upper(), font_equipo, y_equipos + spacing, COLOR_BEIGE)
 
     # =========================
     # ESCUDO
