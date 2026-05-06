@@ -14,12 +14,19 @@ def normalize_text(texto):
 
 def abbreviate_team(name):
     parts = name.strip().split()
-    if len(parts) <= 1:
+    if not parts:
         return name
-    second = ''.join(ch for ch in parts[1] if ch.isalnum())[:2]
-    if not second:
-        return parts[0]
-    return f"{parts[0]} {second}."
+    if len(parts) == 1:
+        short = parts[0]
+    else:
+        second = ''.join(ch for ch in parts[1] if ch.isalnum())[:2]
+        short = f"{parts[0]} {second}." if second else parts[0]
+    if len(short) <= 10:
+        return short
+    truncated = short[:9]
+    if truncated.endswith(' ') or (len(short) > 9 and short[9] == ' '):
+        return truncated.rstrip()
+    return truncated + '.'
 
 # =========================
 # FUNCIONES DE CENTRADO
