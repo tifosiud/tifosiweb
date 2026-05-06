@@ -1,4 +1,5 @@
 from PIL import Image, ImageDraw, ImageFont
+import datetime
 
 EQUIPO = "Tifosi"
 
@@ -298,6 +299,16 @@ def generar_proximo(data):
     equipo_visitante = data["visitante"]
     ubicacion = data.get("ubicacion", "").strip() or "CDM MARGOT MOLES, VICALVARO"
 
+    # Formatear fecha
+    if fecha != "Fecha no definida":
+        try:
+            fecha_obj = datetime.datetime.strptime(fecha, "%Y-%m-%d")
+            fecha_formateada = fecha_obj.strftime("%d/%m/%y")
+        except ValueError:
+            fecha_formateada = fecha
+    else:
+        fecha_formateada = fecha
+
     COLOR_BEIGE = "#d6c2a1"
 
     img = Image.open("plantilla.png").convert("RGBA")
@@ -325,11 +336,13 @@ def generar_proximo(data):
     # TEXTO PRINCIPAL
     # =========================
     center_text(draw, img, f"JORNADA {data['jornada']}", font_jornada, y_jornada, COLOR_BEIGE)
-    center_text(draw, img, f"{fecha} {hora}", font_fecha, y_fecha, COLOR_BEIGE)
+    center_text(draw, img, f"{fecha_formateada} {hora}", font_fecha, y_fecha, COLOR_BEIGE)
 
-    equipos_text = f"{equipo_local.upper()} VS {equipo_visitante.upper()}"
-    equipo_lines = wrap_team_names(draw, equipos_text, font_equipo, int(ancho * 0.9))
-    center_multiline_text(draw, img, equipo_lines, font_equipo, y_equipos, COLOR_BEIGE, spacing=12)
+    # Equipos en líneas separadas centradas
+    spacing = int(alto * 0.06)
+    center_text(draw, img, equipo_local.upper(), font_equipo, y_equipos - spacing, COLOR_BEIGE)
+    center_text(draw, img, "VS", font_equipo, y_equipos, COLOR_BEIGE)
+    center_text(draw, img, equipo_visitante.upper(), font_equipo, y_equipos + spacing, COLOR_BEIGE)
 
     # =========================
     # ESCUDO
