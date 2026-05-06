@@ -1,7 +1,7 @@
 [
   {
     "pos": 1,
-    "equipo": "Tradicion Trujillana",
+    "equipo": "Teediejon Titiens",
     "pj": 18,
     "g": 16,
     "e": 1,
@@ -12,7 +12,7 @@
   },
   {
     "pos": 2,
-    "equipo": "patraras",
+    "equipo": "Parrarras",
     "pj": 18,
     "g": 14,
     "e": 2,
@@ -45,7 +45,7 @@
   },
   {
     "pos": 5,
-    "equipo": "BUBASFC",
+    "equipo": "BUBAS FC",
     "pj": 18,
     "g": 7,
     "e": 4,
@@ -67,7 +67,7 @@
   },
   {
     "pos": 7,
-    "equipo": "Deportivo dela",
+    "equipo": "Pezuna",
     "pj": 18,
     "g": 5,
     "e": 4,
@@ -75,6 +75,17 @@
     "favor": 34,
     "contra": 40,
     "pts": 19
+  },
+  {
+    "pos": 8,
+    "equipo": "Tifosi",
+    "pj": 18,
+    "g": 4,
+    "e": 4,
+    "p": 10,
+    "favor": 29,
+    "contra": 57,
+    "pts": 16
   },
   {
     "pos": 9,

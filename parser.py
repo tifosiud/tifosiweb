@@ -49,9 +49,13 @@ def parse_clasificacion_text(texto):
 
         trailing = []
         i = len(tokens) - 1
-        while i >= 0 and tokens[i].isdigit():
-            trailing.insert(0, tokens[i])
-            i -= 1
+        while i >= 0:
+            cleaned = re.sub(r'[^\d]', '', tokens[i])
+            if cleaned.isdigit():
+                trailing.insert(0, cleaned)
+                i -= 1
+            else:
+                break
 
         if len(trailing) < 2:
             continue
