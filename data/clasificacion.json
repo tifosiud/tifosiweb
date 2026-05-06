@@ -1,1 +1,79 @@
-{}
+[
+  {
+    "pos": 2,
+    "equipo": "Fc",
+    "pj": 18,
+    "g": 14,
+    "e": 2,
+    "p": 2,
+    "favor": 72,
+    "contra": 18,
+    "pts": 44
+  },
+  {
+    "pos": 3,
+    "equipo": "RAYOVALLACANO",
+    "pj": 19,
+    "g": 12,
+    "e": 4,
+    "p": 3,
+    "favor": 64,
+    "contra": 39,
+    "pts": 40
+  },
+  {
+    "pos": 4,
+    "equipo": "SNOWYSUPRIMSFC",
+    "pj": 18,
+    "g": 10,
+    "e": 1,
+    "p": 7,
+    "favor": 59,
+    "contra": 46,
+    "pts": 31
+  },
+  {
+    "pos": 6,
+    "equipo": "LANCEROS",
+    "pj": 18,
+    "g": 6,
+    "e": 2,
+    "p": 10,
+    "favor": 34,
+    "contra": 53,
+    "pts": 20
+  },
+  {
+    "pos": 7,
+    "equipo": "peperive dela",
+    "pj": 18,
+    "g": 5,
+    "e": 4,
+    "p": 9,
+    "favor": 34,
+    "contra": 40,
+    "pts": 19
+  },
+  {
+    "pos": 9,
+    "equipo": "VIGAROS FC",
+    "pj": 18,
+    "g": 4,
+    "e": 4,
+    "p": 10,
+    "favor": 24,
+    "contra": 2,
+    "pts": 16
+  },
+  {
+    "pos": 11,
+    "equipo": "VodkaJuniorsF.C.",
+    "pj": 19,
+    "g": 2,
+    "e": 3,
+    "p": 13,
+    "favor": 31,
+    "contra": 80,
+    "pts": 7
+  }
+]

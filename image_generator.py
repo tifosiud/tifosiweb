@@ -386,3 +386,43 @@ def generar_proximo(data):
     img_story.save(build_image_path(jornada, "info", f"{jornada_label}_info_story.png"))
 
     return ruta
+
+
+def generar_clasificacion(jornada, clasificacion):
+    ancho = 1080
+    alto = max(1080, 220 + len(clasificacion) * 80)
+    img = Image.new("RGBA", (ancho, alto), "#ffffff")
+    draw = ImageDraw.Draw(img)
+
+    title_font = ImageFont.truetype("fonts/Bauman-Regular.ttf", 60)
+    header_font = ImageFont.truetype("fonts/Bauman-Regular.ttf", 40)
+    row_font = ImageFont.truetype("fonts/Bauman-Regular.ttf", 36)
+
+    draw.rectangle([(0, 0), (ancho, 140)], fill="#1565c0")
+    draw.text((40, 40), f"Clasificación J{jornada}", fill="white", font=title_font)
+
+    x_pos = [50, 140, 700, 920]
+    draw.text((x_pos[0], 180), "#", fill="#333333", font=header_font)
+    draw.text((x_pos[1], 180), "Equipo", fill="#333333", font=header_font)
+    draw.text((x_pos[2], 180), "J", fill="#333333", font=header_font)
+    draw.text((x_pos[3], 180), "Pts", fill="#333333", font=header_font)
+
+    y = 240
+    for item in clasificacion:
+        draw.text((x_pos[0], y), str(item["pos"]), fill="#111111", font=row_font)
+        draw.text((x_pos[1], y), item["equipo"], fill="#111111", font=row_font)
+        draw.text((x_pos[2], y), str(item["pj"]), fill="#111111", font=row_font)
+        draw.text((x_pos[3], y), str(item["pts"]), fill="#111111", font=row_font)
+        y += 70
+
+    jornada_label = f"j{jornada}"
+    ruta = build_image_path(jornada, "clasificacion", f"{jornada_label}_clasificacion.png")
+    img.save(ruta)
+
+    img_square = img.resize((1080, 1080))
+    img_square.save(build_image_path(jornada, "clasificacion", f"{jornada_label}_clasificacion_ig.png"))
+
+    img_story = img.resize((1080, 1920))
+    img_story.save(build_image_path(jornada, "clasificacion", f"{jornada_label}_clasificacion_story.png"))
+
+    return ruta
