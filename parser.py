@@ -37,12 +37,12 @@ def parse_clasificacion_text(texto):
         if not line or re.search(r'Clasificaci|Equipo|Pts|Fase|Grupo|MuniM@d', line, re.I):
             continue
 
-        match = re.match(r'^\D*(\d+)\s+(.+)$', line)
+        match = re.match(r'^\D*(\d+)[\W_]*(.+)$', line)
         if not match:
             continue
 
         pos = int(match.group(1))
-        rest = match.group(2).strip()
+        rest = re.sub(r'^[\W_]+', '', match.group(2)).strip()
         tokens = rest.split()
         if not tokens:
             continue
