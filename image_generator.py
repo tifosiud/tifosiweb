@@ -16,6 +16,59 @@ def center_text_x(draw, text, font, x, y, color):
     w = bbox[2] - bbox[0]
     draw.text((x - w // 2, y), text, fill=color, font=font)
 
+def center_multiline_text(draw, img, lines, font, y, color, spacing=10):
+    total_height = 0
+    heights = []
+    for line in lines:
+        bbox = draw.textbbox((0, 0), line, font=font)
+        h = bbox[3] - bbox[1]
+        heights.append(h)
+        total_height += h
+    total_height += spacing * (len(lines) - 1)
+    current_y = y - total_height // 2
+
+    for line, height in zip(lines, heights):
+        center_text(draw, img, line, font, current_y, color)
+        current_y += height + spacing
+
+
+def wrap_team_names(draw, text, font, max_width):
+    bbox = draw.textbbox((0, 0), text, font=font)
+    if bbox[2] - bbox[0] <= max_width:
+        return [text]
+
+    if " VS " in text:
+        local, _, visitante = text.partition(" VS ")
+        first_line = local
+        second_line = f"VS {visitante}"
+        bbox2 = draw.textbbox((0, 0), second_line, font=font)
+        if bbox2[2] - bbox2[0] <= max_width:
+            return [first_line, second_line]
+
+        second_line = "VS"
+        third_line = visitante
+        return [first_line, second_line, third_line]
+
+    return [text]
+
+
+def wrap_text(draw, text, font, max_width):
+    words = text.split()
+    lines = []
+    current = ""
+    for word in words:
+        candidate = f"{current} {word}".strip()
+        bbox = draw.textbbox((0, 0), candidate, font=font)
+        if bbox[2] - bbox[0] <= max_width:
+            current = candidate
+        else:
+            if current:
+                lines.append(current)
+            current = word
+    if current:
+        lines.append(current)
+    return lines or [text]
+
 # =========================
 # GENERADOR
 # =========================
@@ -234,5 +287,75 @@ def generar(data):
     img_story = img.resize((1080, 1920))
     img_story.save(f"imagenes/jornada_{data['jornada']}_story.png")
 
+
+    return ruta
+
+
+def generar_proximo(data):
+    fecha = data["fecha"]
+    hora = data["hora"]
+    equipo_local = data["local"]
+    equipo_visitante = data["visitante"]
+    ubicacion = data.get("ubicacion", "").strip() or "CDM MARGOT MOLES, VICALVARO"
+
+    COLOR_BEIGE = "#d6c2a1"
+
+    img = Image.open("plantilla.png").convert("RGBA")
+    draw = ImageDraw.Draw(img)
+    ancho, alto = img.size
+
+    # =========================
+    # POSICIONES
+    # =========================
+    y_jornada = int(alto * 0.08)
+    y_fecha = int(alto * 0.18)
+    y_equipos = int(alto * 0.32)
+    y_escudo = int(alto * 0.52)
+    y_ubicacion = int(alto * 0.80)
+
+    # =========================
+    # FUENTES
+    # =========================
+    font_jornada = ImageFont.truetype("fonts/Bauman-Regular.ttf", int(ancho * 0.055))
+    font_fecha = ImageFont.truetype("fonts/Bauman-Regular.ttf", int(ancho * 0.062))
+    font_equipo = ImageFont.truetype("fonts/Bauman-Regular.ttf", int(ancho * 0.095))
+    font_ubicacion = ImageFont.truetype("fonts/Bauman-Regular.ttf", int(ancho * 0.042))
+
+    # =========================
+    # TEXTO PRINCIPAL
+    # =========================
+    center_text(draw, img, f"JORNADA {data['jornada']}", font_jornada, y_jornada, COLOR_BEIGE)
+    center_text(draw, img, f"{fecha} {hora}", font_fecha, y_fecha, COLOR_BEIGE)
+
+    equipos_text = f"{equipo_local.upper()} VS {equipo_visitante.upper()}"
+    equipo_lines = wrap_team_names(draw, equipos_text, font_equipo, int(ancho * 0.9))
+    center_multiline_text(draw, img, equipo_lines, font_equipo, y_equipos, COLOR_BEIGE, spacing=12)
+
+    # =========================
+    # ESCUDO
+    # =========================
+    escudo = Image.open("escudo.png").convert("RGBA")
+    escudo_size = int(ancho * 0.30)
+    escudo = escudo.resize((escudo_size, escudo_size), Image.LANCZOS)
+    x_escudo = (ancho - escudo_size) // 2
+    img.paste(escudo, (x_escudo, y_escudo), escudo)
+
+    # =========================
+    # UBICACIÓN
+    # =========================
+    ubicacion_lines = wrap_text(draw, ubicacion.upper(), font_ubicacion, int(ancho * 0.85))
+    center_multiline_text(draw, img, ubicacion_lines, font_ubicacion, y_ubicacion, COLOR_BEIGE, spacing=8)
+
+    # =========================
+    # EXPORTAR
+    # =========================
+    ruta = f"imagenes/proximo_jornada_{data['jornada']}.png"
+    img.save(ruta)
+
+    img_square = img.resize((1080, 1080))
+    img_square.save(f"imagenes/proximo_jornada_{data['jornada']}_ig.png")
+
+    img_story = img.resize((1080, 1920))
+    img_story.save(f"imagenes/proximo_jornada_{data['jornada']}_story.png")
 
     return ruta

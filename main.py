@@ -1,8 +1,9 @@
 import json
 import os
+import re
 from telegram.ext import Application, MessageHandler, filters, CommandHandler
 from parser import parse_resultado
-from image_generator import generar
+from image_generator import generar, generar_proximo
 
 TOKEN = "8768812473:AAGKL-wV_vCm0_poBml5MIxpQO5s55Vm9Sc"
 
@@ -64,28 +65,36 @@ async def manejar_texto(update, context):
         # P → PRÓXIMO PARTIDO
         # =========================
         elif tipo == "P":
+            match = re.match(r'P\s+J(\d+)\s+(.+?)\s+vs\s+(.+?)\s+(\d{1,2}:\d{2})(?:\s+(.+))?$', texto, re.I)
+            if not match:
+                raise ValueError("Formato de próximo partido no reconocido")
 
-            partes = texto.split(" ")
-
-            jornada = int(partes[1][1:])
-            local = partes[2]
-            visitante = partes[4]
-            hora = partes[5]
+            jornada = int(match.group(1))
+            local = match.group(2)
+            visitante = match.group(3)
+            hora = match.group(4)
+            ubicacion = match.group(5) or "CDM MARGOT MOLES, VICALVARO"
 
             with open("data/jornadas.json", "r") as f:
                 jornadas = json.load(f)
 
             fecha = jornadas.get(str(jornada), "Fecha no definida")
 
-            with open("data/proximo.json", "w") as f:
-                json.dump({
-                    "jornada": jornada,
-                    "fecha": fecha,
-                    "hora": hora,
-                    "local": local,
-                    "visitante": visitante
-                }, f, indent=2)
+            proximo_data = {
+                "jornada": jornada,
+                "fecha": fecha,
+                "hora": hora,
+                "local": local,
+                "visitante": visitante,
+                "ubicacion": ubicacion
+            }
 
+            with open("data/proximo.json", "w") as f:
+                json.dump(proximo_data, f, indent=2)
+
+            ruta_img = generar_proximo(proximo_data)
+            with open(ruta_img, "rb") as photo:
+                await update.message.reply_photo(photo=photo)
             await update.message.reply_text("Próximo partido actualizado ✅")
 
         else:
