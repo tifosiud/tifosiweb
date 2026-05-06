@@ -322,7 +322,7 @@ def generar_proximo(data):
     y_fecha = int(alto * 0.15)
     y_equipos = int(alto * 0.35)
     y_escudo = int(alto * 0.70)
-    y_ubicacion = int(alto * 0.90)
+    y_ubicacion = int(alto * 0.95)
 
     # =========================
     # FUENTES
