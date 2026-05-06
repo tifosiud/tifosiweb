@@ -37,7 +37,9 @@ border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,.1);}
 
 <div class="card">
 <h3>Próximo partido</h3>
-<div id="proximo"></div>
+<div id="proximo">
+  <img id="img-proximo" alt="Próximo partido" style="display:none;">
+</div>
 </div>
 
 <div class="card">
@@ -79,12 +81,16 @@ async function cargarDatos(){
   let proximo = await getJSON('data/proximo.json');
   let div = document.getElementById("proximo");
 
+  let imgProximo = document.getElementById("img-proximo");
+
   if(proximo && proximo.jornada){
-    div.innerHTML =
-      `<div class="match">${proximo.local} vs ${proximo.visitante}</div>
-       <div class="date">J${proximo.jornada} · ${proximo.fecha} · ${proximo.hora}</div>`;
+    div.innerHTML = "";
+    imgProximo.src = "imagenes/proximo_jornada_" + proximo.jornada + ".png";
+    imgProximo.style.display = "block";
   }else{
     div.innerText = "No definido";
+    imgProximo.style.display = "none";
+    imgProximo.src = "";
   }
 
   // RESULTADOS EQUIPO
