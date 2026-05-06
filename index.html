@@ -135,13 +135,13 @@ async function cargarDatos(){
 
   // CLASIFICACION
   let clas = await getJSON('data/clasificacion.json') || [];
-  proximo = await getJSON('data/proximo.json');
+  let proximoClas = proximo;
 
   let cont = document.getElementById("clasificacion");
   cont.innerHTML = "";
 
   // Intentar mostrar imagen de clasificación si existe
-  let jornada = proximo && proximo.jornada ? proximo.jornada : 1;
+  let jornada = proximoClas && proximoClas.jornada ? proximoClas.jornada : 1;
   let imgClasPath = `imagenes/j${jornada}/clasificacion/j${jornada}_clasificacion.png`;
 
   // Verificar si la imagen existe (haciendo una petición HEAD)
