@@ -418,34 +418,56 @@ def generar_clasificacion(jornada, clasificacion):
     img = Image.new("RGBA", (ancho, alto), "#ffffff")
     draw = ImageDraw.Draw(img)
 
+    # Colores del escudo
+    COLOR_BEIGE = "#d6c2a1"
+    COLOR_AZUL = "#1565c0"
+    COLOR_MARRON = "#642d00"
+    COLOR_GRIS_CLARO = "#f7f2e8"
+
     title_font = ImageFont.truetype("fonts/Bauman-Regular.ttf", 60)
     header_font = ImageFont.truetype("fonts/Bauman-Regular.ttf", 40)
     row_font = ImageFont.truetype("fonts/Bauman-Regular.ttf", 36)
 
-    draw.rectangle([(0, 0), (ancho, 140)], fill="#1565c0")
-    draw.text((40, 40), normalize_text(f"Clasificación J{jornada}"), fill="white", font=title_font)
+    # Cabecera con colores del escudo
+    draw.rectangle([(0, 0), (ancho, 140)], fill=COLOR_BEIGE)
+    draw.text((40, 40), normalize_text(f"Clasificación J{jornada}"), fill=COLOR_MARRON, font=title_font)
 
     x_pos = [50, 120, 380, 520, 620, 720, 820, 920]
-    draw.text((x_pos[0], 180), "#", fill="#333333", font=header_font)
-    draw.text((x_pos[1], 180), "Equipo", fill="#333333", font=header_font)
-    draw.text((x_pos[2], 180), "J", fill="#333333", font=header_font)
-    draw.text((x_pos[3], 180), "G", fill="#333333", font=header_font)
-    draw.text((x_pos[4], 180), "E", fill="#333333", font=header_font)
-    draw.text((x_pos[5], 180), "P", fill="#333333", font=header_font)
-    draw.text((x_pos[6], 180), "DIF", fill="#333333", font=header_font)
-    draw.text((x_pos[7], 180), "Pts", fill="#333333", font=header_font)
+    # Encabezados con colores del escudo
+    draw.text((x_pos[0], 180), "#", fill=COLOR_MARRON, font=header_font)
+    draw.text((x_pos[1], 180), "Equipo", fill=COLOR_MARRON, font=header_font)
+    draw.text((x_pos[2], 180), "J", fill=COLOR_MARRON, font=header_font)
+    draw.text((x_pos[3], 180), "G", fill=COLOR_MARRON, font=header_font)
+    draw.text((x_pos[4], 180), "E", fill=COLOR_MARRON, font=header_font)
+    draw.text((x_pos[5], 180), "P", fill=COLOR_MARRON, font=header_font)
+    draw.text((x_pos[6], 180), "DIF", fill=COLOR_MARRON, font=header_font)
+    draw.text((x_pos[7], 180), "Pts", fill=COLOR_MARRON, font=header_font)
 
     y = 240
     for item in clasificacion:
         dif = item.get("dif") if item.get("dif") is not None else item.get("favor", 0) - item.get("contra", 0)
-        draw.text((x_pos[0], y), str(item["pos"]), fill="#111111", font=row_font)
-        draw.text((x_pos[1], y), normalize_text(abbreviate_team(item["equipo"])), fill="#111111", font=row_font)
-        draw.text((x_pos[2], y), str(item["pj"]), fill="#111111", font=row_font)
-        draw.text((x_pos[3], y), str(item.get("g", 0)), fill="#111111", font=row_font)
-        draw.text((x_pos[4], y), str(item.get("e", 0)), fill="#111111", font=row_font)
-        draw.text((x_pos[5], y), str(item.get("p", 0)), fill="#111111", font=row_font)
-        draw.text((x_pos[6], y), str(dif), fill="#111111", font=row_font)
-        draw.text((x_pos[7], y), str(item.get("pts", 0)), fill="#111111", font=row_font)
+
+        # Resaltar fila de Tifosi con colores del escudo
+        if item["equipo"].strip().lower() == "tifosi":
+            # Fondo degradado para la fila completa
+            draw.rectangle([(0, y-10), (ancho, y+50)], fill=(214, 194, 161, 77))  # Beige con transparencia
+            # Borde izquierdo azul
+            draw.rectangle([(0, y-10), (8, y+50)], fill=COLOR_AZUL)
+            text_color = COLOR_MARRON  # Texto más oscuro para contraste
+        else:
+            # Filas alternas con fondo claro
+            if (y // 70) % 2 == 0:
+                draw.rectangle([(0, y-10), (ancho, y+50)], fill=COLOR_GRIS_CLARO)
+            text_color = "#111111"
+
+        draw.text((x_pos[0], y), str(item["pos"]), fill=text_color, font=row_font)
+        draw.text((x_pos[1], y), normalize_text(abbreviate_team(item["equipo"])), fill=text_color, font=row_font)
+        draw.text((x_pos[2], y), str(item["pj"]), fill=text_color, font=row_font)
+        draw.text((x_pos[3], y), str(item.get("g", 0)), fill=text_color, font=row_font)
+        draw.text((x_pos[4], y), str(item.get("e", 0)), fill=text_color, font=row_font)
+        draw.text((x_pos[5], y), str(item.get("p", 0)), fill=text_color, font=row_font)
+        draw.text((x_pos[6], y), str(dif), fill=text_color, font=row_font)
+        draw.text((x_pos[7], y), str(item.get("pts", 0)), fill=text_color, font=row_font)
         y += 70
 
     jornada_label = f"j{jornada}"
