@@ -86,7 +86,7 @@ async function cargarDatos(){
   if(proximo && proximo.jornada){
     div.innerHTML = "";
     div.appendChild(imgProximo);
-    imgProximo.src = "imagenes/proximo_jornada_" + proximo.jornada + ".png";
+    imgProximo.src = "imagenes/j" + proximo.jornada + "/info/j" + proximo.jornada + "_info.png";
     imgProximo.style.display = "block";
   }else{
     imgProximo.style.display = "none";
@@ -100,7 +100,7 @@ async function cargarDatos(){
   if(resultados.length){
     let ultimo = resultados[resultados.length -1];
     document.getElementById("img").src =
-      "imagenes/jornada_" + ultimo.jornada + ".png";
+      "imagenes/j" + ultimo.jornada + "/resultado/j" + ultimo.jornada + "_resultado.png";
   }
 
   let ul = document.getElementById("equipo");

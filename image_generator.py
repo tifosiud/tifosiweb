@@ -1,5 +1,6 @@
 from PIL import Image, ImageDraw, ImageFont
 import datetime
+import os
 
 EQUIPO = "Tifosi"
 
@@ -69,6 +70,16 @@ def wrap_text(draw, text, font, max_width):
     if current:
         lines.append(current)
     return lines or [text]
+
+# =========================
+# HELPERS
+# =========================
+
+def build_image_path(jornada, tipo, filename):
+    folder = os.path.join("imagenes", f"j{jornada}", tipo)
+    os.makedirs(folder, exist_ok=True)
+    return os.path.join(folder, filename)
+
 
 # =========================
 # GENERADOR
@@ -275,19 +286,20 @@ def generar(data):
     # =========================
     # EXPORTAR
     # =========================
-    ruta = f"imagenes/jornada_{data['jornada']}.png"
-    
+    jornada = data['jornada']
+    jornada_label = f"j{jornada}"
+    ruta = build_image_path(jornada, "resultado", f"{jornada_label}_resultado.png")
+
     # Guardado principal
     img.save(ruta)
 
     # 📱 versión cuadrada Instagram
     img_square = img.resize((1080, 1080))
-    img_square.save(f"imagenes/jornada_{data['jornada']}_ig.png")
+    img_square.save(build_image_path(jornada, "resultado", f"{jornada_label}_resultado_ig.png"))
 
     # 📲 versión story (vertical)
     img_story = img.resize((1080, 1920))
-    img_story.save(f"imagenes/jornada_{data['jornada']}_story.png")
-
+    img_story.save(build_image_path(jornada, "resultado", f"{jornada_label}_resultado_story.png"))
 
     return ruta
 
@@ -362,13 +374,15 @@ def generar_proximo(data):
     # =========================
     # EXPORTAR
     # =========================
-    ruta = f"imagenes/proximo_jornada_{data['jornada']}.png"
+    jornada = data['jornada']
+    jornada_label = f"j{jornada}"
+    ruta = build_image_path(jornada, "info", f"{jornada_label}_info.png")
     img.save(ruta)
 
     img_square = img.resize((1080, 1080))
-    img_square.save(f"imagenes/proximo_jornada_{data['jornada']}_ig.png")
+    img_square.save(build_image_path(jornada, "info", f"{jornada_label}_info_ig.png"))
 
     img_story = img.resize((1080, 1920))
-    img_story.save(f"imagenes/proximo_jornada_{data['jornada']}_story.png")
+    img_story.save(build_image_path(jornada, "info", f"{jornada_label}_info_story.png"))
 
     return ruta
