@@ -80,6 +80,8 @@ async def manejar_texto(update, context):
 
             fecha = jornadas.get(str(jornada), "Fecha no definida")
 
+            #COMENTARIO
+
             proximo_data = {
                 "jornada": jornada,
                 "fecha": fecha,
