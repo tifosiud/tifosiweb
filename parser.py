@@ -37,25 +37,26 @@ def parse_clasificacion_text(texto):
         if not line or re.search(r'Clasificaci|Equipo|Pts|Fase|Grupo|MuniM@d', line, re.I):
             continue
 
-        parts = line.split()
-        if not parts[0].isdigit():
+        match = re.match(r'^\D*(\d+)\s+(.+)$', line)
+        if not match:
             continue
 
-        pos = int(parts[0])
-        rest_tokens = parts[1:]
-        if not rest_tokens:
+        pos = int(match.group(1))
+        rest = match.group(2).strip()
+        tokens = rest.split()
+        if not tokens:
             continue
 
         trailing = []
-        i = len(rest_tokens) - 1
-        while i >= 0 and rest_tokens[i].isdigit():
-            trailing.insert(0, rest_tokens[i])
+        i = len(tokens) - 1
+        while i >= 0 and tokens[i].isdigit():
+            trailing.insert(0, tokens[i])
             i -= 1
 
         if len(trailing) < 2:
             continue
 
-        equipo = ' '.join(rest_tokens[: i + 1]).strip()
+        equipo = ' '.join(tokens[: i + 1]).strip()
         equipo = re.sub(r'\s*@\s*$', '', equipo).strip()
         if not equipo:
             continue
