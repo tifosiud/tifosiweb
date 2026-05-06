@@ -1,5 +1,13 @@
 import re
+import unicodedata
 from ocr import leer_imagen
+
+
+def normalize_text(texto):
+    texto = unicodedata.normalize('NFD', texto)
+    texto = ''.join(ch for ch in texto if unicodedata.category(ch) != 'Mn')
+    return texto.replace('Ñ', 'N').replace('ñ', 'n')
+
 
 def parse_resultado(texto):
     jornada = int(re.search(r'J(\d+)', texto).group(1))
@@ -21,7 +29,7 @@ def parse_resultado(texto):
 
 
 def parse_clasificacion_text(texto):
-    texto = texto.replace('\xa0', ' ')
+    texto = normalize_text(texto.replace('\xa0', ' '))
     lines = [re.sub(r'\s+', ' ', line).strip() for line in texto.splitlines()]
 
     clasificacion = []

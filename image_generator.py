@@ -1,8 +1,15 @@
 from PIL import Image, ImageDraw, ImageFont
 import datetime
 import os
+import unicodedata
 
 EQUIPO = "Tifosi"
+
+
+def normalize_text(texto):
+    texto = unicodedata.normalize('NFD', texto)
+    texto = ''.join(ch for ch in texto if unicodedata.category(ch) != 'Mn')
+    return texto.replace('Ñ', 'N').replace('ñ', 'n')
 
 # =========================
 # FUNCIONES DE CENTRADO
@@ -399,7 +406,7 @@ def generar_clasificacion(jornada, clasificacion):
     row_font = ImageFont.truetype("fonts/Bauman-Regular.ttf", 36)
 
     draw.rectangle([(0, 0), (ancho, 140)], fill="#1565c0")
-    draw.text((40, 40), f"Clasificación J{jornada}", fill="white", font=title_font)
+    draw.text((40, 40), normalize_text(f"Clasificación J{jornada}"), fill="white", font=title_font)
 
     x_pos = [50, 140, 700, 920]
     draw.text((x_pos[0], 180), "#", fill="#333333", font=header_font)
@@ -410,7 +417,7 @@ def generar_clasificacion(jornada, clasificacion):
     y = 240
     for item in clasificacion:
         draw.text((x_pos[0], y), str(item["pos"]), fill="#111111", font=row_font)
-        draw.text((x_pos[1], y), item["equipo"], fill="#111111", font=row_font)
+        draw.text((x_pos[1], y), normalize_text(item["equipo"]), fill="#111111", font=row_font)
         draw.text((x_pos[2], y), str(item["pj"]), fill="#111111", font=row_font)
         draw.text((x_pos[3], y), str(item["pts"]), fill="#111111", font=row_font)
         y += 70

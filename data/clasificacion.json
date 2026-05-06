@@ -1,7 +1,18 @@
 [
   {
+    "pos": 1,
+    "equipo": "Tradici\u00f3n Trujillana",
+    "pj": 18,
+    "g": 16,
+    "e": 1,
+    "p": 1,
+    "favor": 83,
+    "contra": 18,
+    "pts": 49
+  },
+  {
     "pos": 2,
-    "equipo": "Fc",
+    "equipo": "patraras",
     "pj": 18,
     "g": 14,
     "e": 2,
@@ -33,6 +44,17 @@
     "pts": 31
   },
   {
+    "pos": 5,
+    "equipo": "BUBASFC",
+    "pj": 18,
+    "g": 7,
+    "e": 4,
+    "p": 7,
+    "favor": 44,
+    "contra": 28,
+    "pts": 25
+  },
+  {
     "pos": 6,
     "equipo": "LANCEROS",
     "pj": 18,
@@ -45,7 +67,7 @@
   },
   {
     "pos": 7,
-    "equipo": "peperive dela",
+    "equipo": "Deportivo dela",
     "pj": 18,
     "g": 5,
     "e": 4,
@@ -62,12 +84,23 @@
     "e": 4,
     "p": 10,
     "favor": 24,
-    "contra": 2,
+    "contra": 52,
     "pts": 16
   },
   {
+    "pos": 10,
+    "equipo": "NUMANCIA",
+    "pj": 18,
+    "g": 4,
+    "e": 3,
+    "p": 11,
+    "favor": 32,
+    "contra": 75,
+    "pts": 15
+  },
+  {
     "pos": 11,
-    "equipo": "VodkaJuniorsF.C.",
+    "equipo": "Vodka Juniors F.C.",
     "pj": 19,
     "g": 2,
     "e": 3,
