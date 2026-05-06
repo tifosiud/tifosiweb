@@ -15,5 +15,22 @@
         1
       ]
     ]
+  },
+  {
+    "jornada": 19,
+    "local": "Tifosi",
+    "visitante": "Lanceros",
+    "goles_local": 3,
+    "goles_visitante": 3,
+    "goleadores": [
+      [
+        "Victor",
+        2
+      ],
+      [
+        "Ricky",
+        1
+      ]
+    ]
   }
 ]
