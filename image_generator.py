@@ -328,7 +328,7 @@ def generar_proximo(data):
     # FUENTES
     # =========================
     font_jornada = ImageFont.truetype("fonts/Bauman-Regular.ttf", int(ancho * 0.1))
-    font_fecha = ImageFont.truetype("fonts/Bauman-Regular.ttf", int(ancho * 0.8))
+    font_fecha = ImageFont.truetype("fonts/Bauman-Regular.ttf", int(ancho * 0.08))
     font_equipo = ImageFont.truetype("fonts/Bauman-Regular.ttf", int(ancho * 0.15))
     font_ubicacion = ImageFont.truetype("fonts/Bauman-Regular.ttf", int(ancho * 0.042))
 
