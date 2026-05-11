@@ -66,5 +66,18 @@
         1
       ]
     ]
+  },
+  {
+    "jornada": 20,
+    "local": "Numancia",
+    "visitante": "Tifosi",
+    "goles_local": 0,
+    "goles_visitante": 1,
+    "goleadores": [
+      [
+        "Said",
+        1
+      ]
+    ]
   }
 ]
