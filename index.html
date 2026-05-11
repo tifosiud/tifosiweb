@@ -116,22 +116,27 @@ async function cargarDatos(){
 
   let ul = document.getElementById("equipo");
   ul.innerHTML = "";
-  resultados.slice().reverse().forEach(r=>{
-    let li = document.createElement("li");
-    li.innerText = `${r.local} ${r.goles_local}-${r.goles_visitante} ${r.visitante}`;
-    ul.appendChild(li);
-  });
+  if(Array.isArray(resultados) && resultados.length){
+    resultados.slice().reverse().forEach(r=>{
+      let li = document.createElement("li");
+      li.innerText = `${r.local} ${r.goles_local}-${r.goles_visitante} ${r.visitante}`;
+      ul.appendChild(li);
+    });
+  }
 
   // LIGA
-  let liga = await getJSON('data/resultados_liga.json') || [];
+  let liga = await getJSON('data/resultados_liga.json');
+  if(!Array.isArray(liga)) liga = [];
   let ul2 = document.getElementById("liga");
   ul2.innerHTML = "";
 
-  liga.slice().reverse().forEach(r=>{
-    let li = document.createElement("li");
-    li.innerText = `${r.local} ${r.goles_local}-${r.goles_visitante} ${r.visitante}`;
-    ul2.appendChild(li);
-  });
+  if(Array.isArray(liga) && liga.length){
+    liga.slice().reverse().forEach(r=>{
+      let li = document.createElement("li");
+      li.innerText = `${r.local} ${r.goles_local}-${r.goles_visitante} ${r.visitante}`;
+      ul2.appendChild(li);
+    });
+  }
 
   // CLASIFICACION
   let clas = await getJSON('data/clasificacion.json') || [];
