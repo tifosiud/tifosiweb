@@ -144,7 +144,7 @@ async function cargarDatos(){
   if(!Array.isArray(clas)) clas = [];
 
   let cont = document.getElementById("clasificacion");
-  cont.innerHTML = "";
+  cont.innerHTML = "Cargando clasificación...";
 
   // Función para intentar cargar una imagen (con promesa)
   function intentarCargarImagen(ruta) {
@@ -156,76 +156,87 @@ async function cargarDatos(){
     });
   }
 
-  // Buscar la última imagen de clasificación disponible
-  let imagenMostrada = false;
+  // Buscar la última imagen de clasificación disponible (todas en paralelo)
+  let promesas = [];
   for (let jornada = 50; jornada >= 1; jornada--) {
     let imgClasPath = `imagenes/j${jornada}/clasificacion/j${jornada}_clasificacion.png`;
-    try {
-      let existe = await intentarCargarImagen(imgClasPath);
-      if (existe) {
-        // Mostrar imagen
-        let img = document.createElement("img");
-        img.src = imgClasPath + "?t=" + Date.now();
-        img.alt = "Clasificación";
-        img.style.width = "100%";
-        img.style.borderRadius = "12px";
-        cont.appendChild(img);
-        imagenMostrada = true;
-        break;
-      }
-    } catch (e) {
-      console.log("Error buscando imagen j" + jornada, e);
+    promesas.push(
+      intentarCargarImagen(imgClasPath).then(existe => ({jornada, existe}))
+    );
+  }
+
+  let resultados = await Promise.all(promesas);
+  let imagenMostrada = false;
+  
+  // Buscar la primera (última jornada) que exista
+  for (let resultado of resultados) {
+    if (resultado.existe) {
+      let jornada = resultado.jornada;
+      let imgClasPath = `imagenes/j${jornada}/clasificacion/j${jornada}_clasificacion.png`;
+      
+      cont.innerHTML = "";
+      let img = document.createElement("img");
+      img.src = imgClasPath + "?t=" + Date.now();
+      img.alt = "Clasificación";
+      img.style.width = "100%";
+      img.style.borderRadius = "12px";
+      cont.appendChild(img);
+      imagenMostrada = true;
+      break;
     }
   }
 
   // Si no se encontró imagen, mostrar tabla
-  if (!imagenMostrada && Array.isArray(clas) && clas.length) {
+  if (!imagenMostrada) {
+    cont.innerHTML = "";
+    if (Array.isArray(clas) && clas.length) {
 
-    clas.sort((a,b)=> b.pts - a.pts);
+      clas.sort((a,b)=> b.pts - a.pts);
 
-    let table = document.createElement("table");
+      let table = document.createElement("table");
 
-    table.innerHTML =
-      "<tr><th>#</th><th>Equipo</th><th>PJ</th><th>G</th><th>E</th><th>P</th><th>DIF</th><th>PTS</th></tr>";
+      table.innerHTML =
+        "<tr><th>#</th><th>Equipo</th><th>PJ</th><th>G</th><th>E</th><th>P</th><th>DIF</th><th>PTS</th></tr>";
 
-    function abbreviateTeam(name) {
-      let parts = name.trim().split(/\s+/).filter(Boolean);
-      if (parts.length === 0) return name;
-      let short = parts[0];
-      if (parts.length > 1) {
-        let second = parts[1].replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9]/g, '');
-        second = second.slice(0, 2);
-        if (second) {
-          short = `${parts[0]} ${second}.`;
+      function abbreviateTeam(name) {
+        let parts = name.trim().split(/\s+/).filter(Boolean);
+        if (parts.length === 0) return name;
+        let short = parts[0];
+        if (parts.length > 1) {
+          let second = parts[1].replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ0-9]/g, '');
+          second = second.slice(0, 2);
+          if (second) {
+            short = `${parts[0]} ${second}.`;
+          }
         }
+        if (short.length <= 10) return short;
+        let truncated = short.slice(0, 9);
+        if (truncated.endsWith(' ') || (short.length > 9 && short[9] === ' ')) return truncated.trimEnd();
+        return truncated + '.';
       }
-      if (short.length <= 10) return short;
-      let truncated = short.slice(0, 9);
-      if (truncated.endsWith(' ') || (short.length > 9 && short[9] === ' ')) return truncated.trimEnd();
-      return truncated + '.';
+
+      clas.forEach((e,i)=>{
+        let row = document.createElement("tr");
+
+        if (e.equipo && e.equipo.trim().toLowerCase() === "tifosi") {
+          row.classList.add("tifosi");
+        }
+
+        row.innerHTML =
+          `<td>${i+1}</td>
+           <td>${abbreviateTeam(e.equipo)}</td>
+           <td>${e.pj}</td>
+           <td>${e.g || 0}</td>
+           <td>${e.e || 0}</td>
+           <td>${e.p || 0}</td>
+           <td>${typeof e.dif !== 'undefined' ? e.dif : (e.favor && e.contra ? e.favor - e.contra : 0)}</td>
+           <td>${e.pts}</td>`;
+
+        table.appendChild(row);
+      });
+
+      cont.appendChild(table);
     }
-
-    clas.forEach((e,i)=>{
-      let row = document.createElement("tr");
-
-      if (e.equipo && e.equipo.trim().toLowerCase() === "tifosi") {
-        row.classList.add("tifosi");
-      }
-
-      row.innerHTML =
-        `<td>${i+1}</td>
-         <td>${abbreviateTeam(e.equipo)}</td>
-         <td>${e.pj}</td>
-         <td>${e.g || 0}</td>
-         <td>${e.e || 0}</td>
-         <td>${e.p || 0}</td>
-         <td>${typeof e.dif !== 'undefined' ? e.dif : (e.favor && e.contra ? e.favor - e.contra : 0)}</td>
-         <td>${e.pts}</td>`;
-
-      table.appendChild(row);
-    });
-
-    cont.appendChild(table);
   }
 }
 
