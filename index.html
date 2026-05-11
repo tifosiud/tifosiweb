@@ -106,7 +106,8 @@ async function cargarDatos(){
   }
 
   // RESULTADOS EQUIPO
-  let resultados = await getJSON('data/resultados_equipo.json') || [];
+  let resultados = await getJSON('data/resultados_equipo.json');
+  if(!Array.isArray(resultados)) resultados = [];
 
   if(resultados.length){
     let ultimo = resultados[resultados.length -1];
@@ -139,7 +140,8 @@ async function cargarDatos(){
   }
 
   // CLASIFICACION
-  let clas = await getJSON('data/clasificacion.json') || [];
+  let clas = await getJSON('data/clasificacion.json');
+  if(!Array.isArray(clas)) clas = [];
 
   let cont = document.getElementById("clasificacion");
   cont.innerHTML = "";
@@ -158,17 +160,21 @@ async function cargarDatos(){
   let imagenMostrada = false;
   for (let jornada = 50; jornada >= 1; jornada--) {
     let imgClasPath = `imagenes/j${jornada}/clasificacion/j${jornada}_clasificacion.png`;
-    let existe = await intentarCargarImagen(imgClasPath);
-    if (existe) {
-      // Mostrar imagen
-      let img = document.createElement("img");
-      img.src = imgClasPath + "?t=" + Date.now();
-      img.alt = "Clasificación";
-      img.style.width = "100%";
-      img.style.borderRadius = "12px";
-      cont.appendChild(img);
-      imagenMostrada = true;
-      break;
+    try {
+      let existe = await intentarCargarImagen(imgClasPath);
+      if (existe) {
+        // Mostrar imagen
+        let img = document.createElement("img");
+        img.src = imgClasPath + "?t=" + Date.now();
+        img.alt = "Clasificación";
+        img.style.width = "100%";
+        img.style.borderRadius = "12px";
+        cont.appendChild(img);
+        imagenMostrada = true;
+        break;
+      }
+    } catch (e) {
+      console.log("Error buscando imagen j" + jornada, e);
     }
   }
 
