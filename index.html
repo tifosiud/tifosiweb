@@ -135,33 +135,40 @@ async function cargarDatos(){
 
   // CLASIFICACION
   let clas = await getJSON('data/clasificacion.json') || [];
-  let proximoClas = proximo;
 
   let cont = document.getElementById("clasificacion");
   cont.innerHTML = "";
 
-  // Intentar mostrar imagen de clasificación si existe
-  let jornada = proximoClas && proximoClas.jornada ? proximoClas.jornada : 1;
-  let imgClasPath = `imagenes/j${jornada}/clasificacion/j${jornada}_clasificacion.png`;
+  // Función para intentar cargar una imagen (con promesa)
+  function intentarCargarImagen(ruta) {
+    return new Promise((resolve) => {
+      let img = new Image();
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+      img.src = ruta + "?t=" + Date.now();
+    });
+  }
 
-  // Verificar si la imagen existe (haciendo una petición HEAD)
-  try {
-    let response = await fetch(imgClasPath, { method: 'HEAD' });
-    if (response.ok) {
+  // Buscar la última imagen de clasificación disponible
+  let imagenMostrada = false;
+  for (let jornada = 50; jornada >= 1; jornada--) {
+    let imgClasPath = `imagenes/j${jornada}/clasificacion/j${jornada}_clasificacion.png`;
+    let existe = await intentarCargarImagen(imgClasPath);
+    if (existe) {
       // Mostrar imagen
       let img = document.createElement("img");
-      img.src = imgClasPath + "?t=" + Date.now(); // Cache busting
+      img.src = imgClasPath + "?t=" + Date.now();
       img.alt = "Clasificación";
       img.style.width = "100%";
       img.style.borderRadius = "12px";
       cont.appendChild(img);
-      return; // Salir, no mostrar tabla
+      imagenMostrada = true;
+      break;
     }
-  } catch (e) {
-    // Imagen no existe, continuar con tabla
   }
 
-  if(Array.isArray(clas) && clas.length){
+  // Si no se encontró imagen, mostrar tabla
+  if (!imagenMostrada && Array.isArray(clas) && clas.length) {
 
     clas.sort((a,b)=> b.pts - a.pts);
 
