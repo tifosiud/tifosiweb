@@ -428,25 +428,27 @@ def generar_clasificacion(jornada, clasificacion):
     header_font = ImageFont.truetype("fonts/Bauman-Regular.ttf", 40)
     row_font = ImageFont.truetype("fonts/Bauman-Regular.ttf", 36)
 
+    # Verificar si hay datos de goles a favor/en contra
+    has_goals = any(item.get("favor", 0) > 0 or item.get("contra", 0) > 0 for item in clasificacion)
+
     # Cabecera con colores del escudo
     draw.rectangle([(0, 0), (ancho, 140)], fill=COLOR_BEIGE)
     draw.text((40, 40), normalize_text(f"Clasificación J{jornada}"), fill=COLOR_MARRON, font=title_font)
 
-    x_pos = [50, 120, 380, 520, 620, 720, 820, 920]
+    # Definir posiciones y encabezados dinámicamente
+    if has_goals:
+        x_pos = [50, 120, 380, 520, 620, 720, 820, 920]
+        headers = ["#", "Equipo", "J", "G", "E", "P", "DIF", "Pts"]
+    else:
+        x_pos = [50, 120, 380, 520, 620, 720, 820]
+        headers = ["#", "Equipo", "J", "G", "E", "P", "Pts"]
+
     # Encabezados con colores del escudo
-    draw.text((x_pos[0], 180), "#", fill=COLOR_MARRON, font=header_font)
-    draw.text((x_pos[1], 180), "Equipo", fill=COLOR_MARRON, font=header_font)
-    draw.text((x_pos[2], 180), "J", fill=COLOR_MARRON, font=header_font)
-    draw.text((x_pos[3], 180), "G", fill=COLOR_MARRON, font=header_font)
-    draw.text((x_pos[4], 180), "E", fill=COLOR_MARRON, font=header_font)
-    draw.text((x_pos[5], 180), "P", fill=COLOR_MARRON, font=header_font)
-    draw.text((x_pos[6], 180), "DIF", fill=COLOR_MARRON, font=header_font)
-    draw.text((x_pos[7], 180), "Pts", fill=COLOR_MARRON, font=header_font)
+    for i, header in enumerate(headers):
+        draw.text((x_pos[i], 180), header, fill=COLOR_MARRON, font=header_font)
 
     y = 240
     for item in clasificacion:
-        dif = item.get("dif") if item.get("dif") is not None else item.get("favor", 0) - item.get("contra", 0)
-
         # Resaltar fila de Tifosi con colores del escudo
         if item["equipo"].strip().lower() == "tifosi":
             # Fondo degradado para la fila completa
@@ -466,8 +468,12 @@ def generar_clasificacion(jornada, clasificacion):
         draw.text((x_pos[3], y), str(item.get("g", 0)), fill=text_color, font=row_font)
         draw.text((x_pos[4], y), str(item.get("e", 0)), fill=text_color, font=row_font)
         draw.text((x_pos[5], y), str(item.get("p", 0)), fill=text_color, font=row_font)
-        draw.text((x_pos[6], y), str(dif), fill=text_color, font=row_font)
-        draw.text((x_pos[7], y), str(item.get("pts", 0)), fill=text_color, font=row_font)
+        if has_goals:
+            dif = item.get("dif") if item.get("dif") is not None else item.get("favor", 0) - item.get("contra", 0)
+            draw.text((x_pos[6], y), str(dif), fill=text_color, font=row_font)
+            draw.text((x_pos[7], y), str(item.get("pts", 0)), fill=text_color, font=row_font)
+        else:
+            draw.text((x_pos[6], y), str(item.get("pts", 0)), fill=text_color, font=row_font)
         y += 70
 
     jornada_label = f"j{jornada}"
