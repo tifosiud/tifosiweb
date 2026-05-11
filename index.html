@@ -106,19 +106,19 @@ async function cargarDatos(){
   }
 
   // RESULTADOS EQUIPO
-  let resultados = await getJSON('data/resultados_equipo.json');
-  if(!Array.isArray(resultados)) resultados = [];
+  let resultadosEquipo = await getJSON('data/resultados_equipo.json');
+  if(!Array.isArray(resultadosEquipo)) resultadosEquipo = [];
 
-  if(resultados.length){
-    let ultimo = resultados[resultados.length -1];
+  if(resultadosEquipo.length){
+    let ultimo = resultadosEquipo[resultadosEquipo.length -1];
     document.getElementById("img").src =
       "imagenes/j" + ultimo.jornada + "/resultado/j" + ultimo.jornada + "_resultado.png";
   }
 
   let ul = document.getElementById("equipo");
   ul.innerHTML = "";
-  if(Array.isArray(resultados) && resultados.length){
-    resultados.slice().reverse().forEach(r=>{
+  if(Array.isArray(resultadosEquipo) && resultadosEquipo.length){
+    resultadosEquipo.slice().reverse().forEach(r=>{
       let li = document.createElement("li");
       li.innerText = `${r.local} ${r.goles_local}-${r.goles_visitante} ${r.visitante}`;
       ul.appendChild(li);
