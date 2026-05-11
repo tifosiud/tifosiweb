@@ -165,11 +165,11 @@ async function cargarDatos(){
     );
   }
 
-  let resultados = await Promise.all(promesas);
+  let resultadosImagenes = await Promise.all(promesas);
   let imagenMostrada = false;
   
   // Buscar la primera (última jornada) que exista
-  for (let resultado of resultados) {
+  for (let resultado of resultadosImagenes) {
     if (resultado.existe) {
       let jornada = resultado.jornada;
       let imgClasPath = `imagenes/j${jornada}/clasificacion/j${jornada}_clasificacion.png`;
