@@ -139,17 +139,11 @@ async function cargarDatos(){
   }
 
   async function buscarUltimaImagen(tipo, nombreBase) {
-    let maxJornada = jornadasReferencia.length ? Math.max(...jornadasReferencia) : null;
-    const jornadasCandidatas = [];
+    const MAX_JORNADA_BUSQUEDA = 50;
+    let maxJornada = jornadasReferencia.length ? Math.max(...jornadasReferencia) : 0;
+    let inicioBusqueda = Math.max(maxJornada, MAX_JORNADA_BUSQUEDA);
 
-    if (Number.isInteger(maxJornada) && maxJornada > 0) {
-      jornadasCandidatas.push(maxJornada);
-      if (maxJornada > 1) jornadasCandidatas.push(maxJornada - 1);
-    } else {
-      jornadasCandidatas.push(22, 20, 19, 18);
-    }
-
-    for (const jornada of jornadasCandidatas) {
+    for (let jornada = inicioBusqueda; jornada >= 1; jornada--) {
       let ruta = `imagenes/j${jornada}/${tipo}/j${jornada}_${nombreBase}.png`;
       let existe = await comprobarImagen(ruta);
       if (existe) return { ruta, jornada };
