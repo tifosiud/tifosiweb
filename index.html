@@ -124,21 +124,35 @@ async function cargarDatos(){
     if (ultimo && Number.isInteger(ultimo.jornada)) jornadasReferencia.push(ultimo.jornada);
   }
 
-  async function cargarRutaFija(tipo) {
-    try {
-      const response = await fetch('last_assets.json?t=' + Date.now());
-      const data = await response.json();
-      const ruta = data[tipo];
-      return ruta ? { ruta, jornada: null } : null;
-    } catch (e) {
-      return null;
+  async function buscarUltimaImagenInterna(tipo) {
+    const maxJornada = 100;
+    for (let jornada = maxJornada; jornada >= 1; jornada--) {
+      const ruta = `imagenes/j${jornada}/${tipo}/j${jornada}_${tipo}.png`;
+      const cacheEntry = imagenCache.get(ruta);
+      if (cacheEntry) {
+        return cacheEntry.existe ? { ruta, jornada } : null;
+      }
+
+      try {
+        const img = new Image();
+        const existe = await new Promise((resolve) => {
+          img.onload = () => resolve(true);
+          img.onerror = () => resolve(false);
+          img.src = ruta + "?t=" + Date.now();
+        });
+        imagenCache.set(ruta, { existe, timestamp: Date.now() });
+        if (existe) return { ruta, jornada };
+      } catch (e) {
+        imagenCache.set(ruta, { existe: false, timestamp: Date.now() });
+      }
     }
+    return null;
   }
 
   let imgResultado = document.getElementById("img");
   if (!resultadoBuscado) {
     resultadoBuscado = true;
-    ultimaImagenResultado = await cargarRutaFija('resultado');
+    ultimaImagenResultado = await buscarUltimaImagenInterna('resultado');
   }
 
   if (ultimaImagenResultado) {
@@ -178,11 +192,11 @@ async function cargarDatos(){
   let cont = document.getElementById("clasificacion");
   cont.innerHTML = "Cargando clasificación...";
 
-  // Solo usar la ruta fija de clasificación la primera vez que carga la página
+  // Solo buscar la clasificación disponible la primera vez que carga la página
   let imagenMostrada = false;
   if (!clasificacionBuscada) {
     clasificacionBuscada = true;
-    ultimaImagenClasificacion = await cargarRutaFija('clasificacion');
+    ultimaImagenClasificacion = await buscarUltimaImagenInterna('clasificacion');
   }
 
   if (ultimaImagenClasificacion) {
