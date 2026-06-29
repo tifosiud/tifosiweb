@@ -452,14 +452,14 @@ def generar_clasificacion(jornada, clasificacion):
         # Resaltar fila de Tifosi con colores del escudo
         if item["equipo"].strip().lower() == "tifosi":
             # Fondo degradado para la fila completa
-            draw.rectangle([(0, y-10), (ancho, y+50)], fill=(214, 194, 161, 77))  # Beige con transparencia
+            draw.rectangle([(0, y-10), (ancho, y+50)], fill=COLOR_MARRON)  # Beige con transparencia
             # Borde izquierdo marrón
             draw.rectangle([(0, y-10), (8, y+50)], fill=COLOR_MARRON)
             text_color = COLOR_BEIGE  # Texto más oscuro para contraste
         else:
             # Filas alternas con fondo claro
             if (y // 70) % 2 == 0:
-                draw.rectangle([(0, y-10), (ancho, y+50)], fill=COLOR_GRIS_CLARO)
+                draw.rectangle([(0, y-10), (ancho, y+50)], fill=COLOR_BEIGE)
             text_color = "#111111"
 
         draw.text((x_pos[0], y), str(item["pos"]), fill=text_color, font=row_font)
