@@ -79,6 +79,8 @@ border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,.12); border-left:4px solid 
 const imagenCache = new Map();
 let ultimaImagenClasificacion = null;
 let clasificacionBuscada = false;
+let imgClasificacionElement = null;
+let cargandoDatos = false;
 
 async function getJSON(url){
   try{
@@ -90,7 +92,7 @@ async function getJSON(url){
   }
 }
 
-async function cargarDatos(){
+async function cargarDatos(buscarClasificacion = false){
 
   // PROXIMO
   let proximo = await getJSON('data/proximo.json');
@@ -202,12 +204,14 @@ async function cargarDatos(){
 
   if (ultimaImagenClasificacion) {
     cont.innerHTML = "";
-    let img = document.createElement("img");
-    img.src = ultimaImagenClasificacion.ruta + "?t=" + Date.now();
-    img.alt = "Clasificación";
-    img.style.width = "100%";
-    img.style.borderRadius = "12px";
-    cont.appendChild(img);
+    if (!imgClasificacionElement) {
+      imgClasificacionElement = document.createElement("img");
+      imgClasificacionElement.src = ultimaImagenClasificacion.ruta + "?t=" + Date.now();
+      imgClasificacionElement.alt = "Clasificación";
+      imgClasificacionElement.style.width = "100%";
+      imgClasificacionElement.style.borderRadius = "12px";
+    }
+    cont.appendChild(imgClasificacionElement);
     imagenMostrada = true;
   }
 
@@ -265,8 +269,18 @@ async function cargarDatos(){
   }
 }
 
-setInterval(cargarDatos,5000);
-cargarDatos();
+async function iniciarRefresco() {
+  if (cargandoDatos) return;
+  cargandoDatos = true;
+  try {
+    await cargarDatos();
+  } finally {
+    cargandoDatos = false;
+    setTimeout(iniciarRefresco, 5000);
+  }
+}
+
+iniciarRefresco();
 </script>
 
 </body>
