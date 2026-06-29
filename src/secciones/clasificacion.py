@@ -1,6 +1,13 @@
 import re
 import unicodedata
-from ocr import leer_imagen
+import sys
+from pathlib import Path
+
+ROOT_DIR = Path(__file__).resolve().parents[1]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+from processing.ocr import leer_imagen
 
 
 def normalize_text(texto):

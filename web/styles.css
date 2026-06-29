@@ -1,0 +1,101 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #000;
+  color: #fff;
+  margin: 0;
+  text-align: center;
+}
+
+h1 {
+  background: #d6c2a1;
+  color: #642d00;
+  padding: 20px;
+  margin: 0;
+  border-bottom: 3px solid #642d00;
+}
+
+h3 {
+  color: #642d00;
+  margin: 0 0 10px;
+}
+
+.container {
+  max-width: 500px;
+  margin: auto;
+  padding: 10px;
+}
+
+.card {
+  background: #d6c2a1;
+  border-radius: 15px;
+  padding: 15px;
+  margin: 15px 0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  border: 2px solid #d6c2a1;
+}
+
+img {
+  width: 100%;
+  border-radius: 12px;
+  border: 2px solid #d6c2a1;
+  display: block;
+  margin: 0 auto;
+}
+
+.placeholder {
+  margin: 0;
+  color: #642d00;
+  font-weight: bold;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+li {
+  background: white;
+  margin: 5px 0;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, .12);
+  border-left: 4px solid #642d00;
+  color: #111;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #d6c2a1;
+  color: #111;
+}
+
+table th {
+  background-color: #d6c2a1 !important;
+  color: #642d00 !important;
+  padding: 8px;
+  border-bottom: 2px solid #000;
+  text-transform: uppercase;
+}
+
+tr:nth-child(even) td {
+  background: #f7f2e8;
+}
+
+td {
+  padding: 6px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  color: #111;
+}
+
+.tifosi {
+  background: linear-gradient(90deg, rgba(214, 194, 161, 0.35), rgba(0, 0, 0, 0.05));
+  font-weight: bold;
+  color: #642d00;
+  border-left: 4px solid #642d00;
+}
+
+.tifosi td {
+  color: #642d00;
+}

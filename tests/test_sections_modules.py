@@ -3,10 +3,17 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from secciones.resultados import parse_resultado
-from secciones.clasificacion import parse_clasificacion_text
-from secciones.resultados_jornada import guardar_resultados_jornada, cargar_resultados_jornada
-from secciones.ultimo_resultado import find_latest_result_asset
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from src.secciones.resultados import parse_resultado
+from src.secciones.clasificacion import parse_clasificacion_text
+from src.secciones.resultados_jornada import guardar_resultados_jornada, cargar_resultados_jornada
+from src.secciones.ultimo_resultado import find_latest_result_asset
 
 
 class TestSectionModules(unittest.TestCase):

@@ -5,29 +5,34 @@ import os
 import re
 import subprocess
 import sys
+from pathlib import Path
 from telegram.ext import Application, MessageHandler, filters, CommandHandler
-from secciones.resultados import parse_resultado
-from secciones.clasificacion import parse_clasificacion_image
-from secciones.proximo_partido import parse_proximo_partido
-from secciones.resultados_jornada import cargar_resultados_jornada, guardar_resultados_jornada
-from secciones.resultados_imagen import generar
-from secciones.proximo_partido_imagen import generar_proximo
-from secciones.clasificacion_imagen import generar_clasificacion
+
+ROOT_DIR = Path(__file__).resolve().parents[2]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+from src.secciones.resultados import parse_resultado
+from src.secciones.clasificacion import parse_clasificacion_image
+from src.secciones.proximo_partido import parse_proximo_partido
+from src.secciones.resultados_jornada import cargar_resultados_jornada, guardar_resultados_jornada
+from src.secciones.resultados_imagen import generar
+from src.secciones.proximo_partido_imagen import generar_proximo
+from src.secciones.clasificacion_imagen import generar_clasificacion
 
 TOKEN = "8768812473:AAGKL-wV_vCm0_poBml5MIxpQO5s55Vm9Sc"
-PID_FILE = os.path.join("tmp", "bot.pid")
-ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+PID_FILE = ROOT_DIR / "tmp" / "bot.pid"
 
 print("🚀 Iniciando bot...")
 
 
 def actualizar_git():
     try:
-        subprocess.run(["git", "add", "data", "imagenes"], cwd=ROOT_DIR, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        result = subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=ROOT_DIR, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        subprocess.run(["git", "add", "data", "imagenes"], cwd=str(ROOT_DIR), check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        result = subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=str(ROOT_DIR), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if result.returncode != 0:
-            subprocess.run(["git", "commit", "-m", "update web"], cwd=ROOT_DIR, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            subprocess.run(["git", "push"], cwd=ROOT_DIR, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            subprocess.run(["git", "commit", "-m", "update web"], cwd=str(ROOT_DIR), check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            subprocess.run(["git", "push"], cwd=str(ROOT_DIR), check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             print("✅ Git actualizado")
         else:
             print("ℹ️ No hay cambios para publicar")
@@ -38,24 +43,34 @@ def actualizar_git():
 
 
 def ensure_single_instance():
-    os.makedirs("tmp", exist_ok=True)
+    PID_FILE.parent.mkdir(parents=True, exist_ok=True)
 
-    if os.path.exists(PID_FILE):
+    existing_pid = None
+    if PID_FILE.exists():
         try:
-            with open(PID_FILE, "r", encoding="utf-8") as f:
-                pid = int(f.read().strip())
-            if pid > 0 and os.path.exists(f"/proc/{pid}"):
-                print("⚠️ Ya hay una instancia del bot en ejecución. Se detiene esta copia.")
-                return False
+            with PID_FILE.open("r", encoding="utf-8") as f:
+                existing_pid = int(f.read().strip())
         except (ValueError, FileNotFoundError):
-            pass
+            existing_pid = None
 
+    if existing_pid and existing_pid > 0:
         try:
-            os.remove(PID_FILE)
+            os.kill(existing_pid, 0)
+        except ProcessLookupError:
+            existing_pid = None
+        except PermissionError:
+            existing_pid = None
+        else:
+            print("⚠️ Ya hay una instancia del bot en ejecución. Se detiene esta copia.")
+            return False
+
+    if PID_FILE.exists():
+        try:
+            PID_FILE.unlink()
         except OSError:
             pass
 
-    with open(PID_FILE, "w", encoding="utf-8") as f:
+    with PID_FILE.open("w", encoding="utf-8") as f:
         f.write(str(os.getpid()))
 
     return True
@@ -63,7 +78,7 @@ def ensure_single_instance():
 
 def cleanup_pid_file():
     try:
-        os.remove(PID_FILE)
+        PID_FILE.unlink()
     except FileNotFoundError:
         pass
 
@@ -89,7 +104,7 @@ async def manejar_texto(update, context):
             data = parse_resultado(texto[2:])
             ruta_img = generar(data)
 
-            with open("data/resultados_equipo.json", "r+") as f:
+            with (ROOT_DIR / "data" / "resultados_equipo.json").open("r+", encoding="utf-8") as f:
                 datos = json.load(f)
                 datos.append(data)
                 f.seek(0)
@@ -115,7 +130,7 @@ async def manejar_texto(update, context):
         elif tipo == "B":
             data = json.loads(texto[2:])
 
-            with open("data/clasificacion.json", "w") as f:
+            with (ROOT_DIR / "data" / "clasificacion.json").open("w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2)
 
             await update.message.reply_text("Clasificación actualizada ✅")
@@ -126,7 +141,7 @@ async def manejar_texto(update, context):
         elif tipo == "P":
             proximo_data = parse_proximo_partido(texto)
 
-            with open("data/proximo.json", "w") as f:
+            with (ROOT_DIR / "data" / "proximo.json").open("w", encoding="utf-8") as f:
                 json.dump(proximo_data, f, indent=2)
 
             ruta_img = generar_proximo(proximo_data)
@@ -160,8 +175,8 @@ async def manejar_foto(update, context):
         return
 
     file = await photos[-1].get_file()
-    os.makedirs("tmp", exist_ok=True)
-    tmp_path = os.path.join("tmp", f"clasificacion_{update.message.message_id}.jpg")
+    (ROOT_DIR / "tmp").mkdir(parents=True, exist_ok=True)
+    tmp_path = ROOT_DIR / "tmp" / f"clasificacion_{update.message.message_id}.jpg"
     await file.download_to_drive(custom_path=tmp_path)
 
     data = parse_clasificacion_image(tmp_path)
