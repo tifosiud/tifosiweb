@@ -124,40 +124,21 @@ async function cargarDatos(){
     if (ultimo && Number.isInteger(ultimo.jornada)) jornadasReferencia.push(ultimo.jornada);
   }
 
-  function construirRutaImagen(tipo, nombreBase, jornada) {
-    return `imagenes/j${jornada}/${tipo}/j${jornada}_${nombreBase}.png`;
-  }
-
-  async function buscarUltimaImagen(tipo, nombreBase) {
-    const limiteSuperior = 100;
-    const rutaBase = `imagenes/j`;
-
-    for (let jornada = limiteSuperior; jornada >= 1; jornada--) {
-      const ruta = `${rutaBase}${jornada}/${tipo}/j${jornada}_${nombreBase}.png`;
-      const cacheEntry = imagenCache.get(ruta);
-      if (cacheEntry) {
-        if (cacheEntry.existe) return { ruta, jornada };
-        continue;
-      }
-
-      const existe = await new Promise((resolve) => {
-        const img = new Image();
-        img.onload = () => resolve(true);
-        img.onerror = () => resolve(false);
-        img.src = ruta + "?t=" + Date.now();
-      });
-
-      imagenCache.set(ruta, { existe, timestamp: Date.now() });
-      if (existe) return { ruta, jornada };
+  async function cargarRutaFija(tipo) {
+    try {
+      const response = await fetch('last_assets.json?t=' + Date.now());
+      const data = await response.json();
+      const ruta = data[tipo];
+      return ruta ? { ruta, jornada: null } : null;
+    } catch (e) {
+      return null;
     }
-
-    return null;
   }
 
   let imgResultado = document.getElementById("img");
   if (!resultadoBuscado) {
     resultadoBuscado = true;
-    ultimaImagenResultado = await buscarUltimaImagen('resultado', 'resultado');
+    ultimaImagenResultado = await cargarRutaFija('resultado');
   }
 
   if (ultimaImagenResultado) {
@@ -197,11 +178,11 @@ async function cargarDatos(){
   let cont = document.getElementById("clasificacion");
   cont.innerHTML = "Cargando clasificación...";
 
-  // Solo buscar la última imagen de clasificación la primera vez que carga la página
+  // Solo usar la ruta fija de clasificación la primera vez que carga la página
   let imagenMostrada = false;
   if (!clasificacionBuscada) {
     clasificacionBuscada = true;
-    ultimaImagenClasificacion = await buscarUltimaImagen('clasificacion', 'clasificacion');
+    ultimaImagenClasificacion = await cargarRutaFija('clasificacion');
   }
 
   if (ultimaImagenClasificacion) {
