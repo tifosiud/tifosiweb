@@ -99,7 +99,7 @@ async function cargarDatos(){
   if(proximo && proximo.jornada){
     div.innerHTML = "";
     div.appendChild(imgProximo);
-    imgProximo.src = "imagenes/j" + proximo.jornada + "/info/j" + proximo.jornada + "_info.png";
+    imgProximo.src = "imagenes/j" + proximo.jornada + "/info/j" + proximo.jornada + "_info.png?t=" + Date.now();
     imgProximo.style.display = "block";
   }else{
     imgProximo.style.display = "none";
@@ -114,7 +114,7 @@ async function cargarDatos(){
   if(resultadosEquipo.length){
     let ultimo = resultadosEquipo[resultadosEquipo.length -1];
     document.getElementById("img").src =
-      "imagenes/j" + ultimo.jornada + "/resultado/j" + ultimo.jornada + "_resultado.png";
+      "imagenes/j" + ultimo.jornada + "/resultado/j" + ultimo.jornada + "_resultado.png?t=" + Date.now();
   }
 
   let ul = document.getElementById("equipo");
@@ -151,8 +151,8 @@ async function cargarDatos(){
   // Función para intentar cargar una imagen (con promesa)
   function intentarCargarImagen(ruta) {
     const cacheEntry = clasificacionCache.get(ruta);
-    if (cacheEntry && Date.now() - cacheEntry.timestamp < 60000) {
-      return Promise.resolve(cacheEntry.existe);
+    if (cacheEntry && cacheEntry.existe && Date.now() - cacheEntry.timestamp < 60000) {
+      return Promise.resolve(true);
     }
 
     return new Promise((resolve) => {
@@ -162,7 +162,6 @@ async function cargarDatos(){
         resolve(true);
       };
       img.onerror = () => {
-        clasificacionCache.set(ruta, { existe: false, timestamp: Date.now() });
         resolve(false);
       };
       img.src = ruta + "?t=" + Date.now();
@@ -177,7 +176,7 @@ async function cargarDatos(){
     let ultimo = resultadosEquipo[resultadosEquipo.length - 1];
     if (ultimo && Number.isInteger(ultimo.jornada)) jornadasReferencia.push(ultimo.jornada);
   }
-  let ultimaJornada = jornadasReferencia.length ? Math.max(...jornadasReferencia) : 20;
+  let ultimaJornada = jornadasReferencia.length ? Math.max(...jornadasReferencia, 30) : 30;
 
   for (let jornada = ultimaJornada; jornada >= 1; jornada--) {
     let imgClasPath = `imagenes/j${jornada}/clasificacion/j${jornada}_clasificacion.png`;
