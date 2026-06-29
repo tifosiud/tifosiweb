@@ -415,7 +415,7 @@ def generar_proximo(data):
 def generar_clasificacion(jornada, clasificacion):
     ancho = 1080
     alto = max(1080, 220 + len(clasificacion) * 80)
-    img = Image.new("RGBA", (ancho, alto), "#ffffff")
+    img = Image.new("RGBA", (ancho, alto), "#d6c2a1")
     draw = ImageDraw.Draw(img)
 
     # Colores del escudo
@@ -453,9 +453,9 @@ def generar_clasificacion(jornada, clasificacion):
         if item["equipo"].strip().lower() == "tifosi":
             # Fondo degradado para la fila completa
             draw.rectangle([(0, y-10), (ancho, y+50)], fill=(214, 194, 161, 77))  # Beige con transparencia
-            # Borde izquierdo azul
-            draw.rectangle([(0, y-10), (8, y+50)], fill=COLOR_AZUL)
-            text_color = COLOR_MARRON  # Texto más oscuro para contraste
+            # Borde izquierdo marrón
+            draw.rectangle([(0, y-10), (8, y+50)], fill=COLOR_MARRON)
+            text_color = COLOR_BEIGE  # Texto más oscuro para contraste
         else:
             # Filas alternas con fondo claro
             if (y // 70) % 2 == 0:
