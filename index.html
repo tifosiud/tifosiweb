@@ -132,23 +132,28 @@ async function cargarDatos(buscarClasificacion = false){
   }
 
   async function buscarUltimaImagen(tipo, nombreBase) {
-    const jornada = obtenerUltimaJornadaConocida();
-    const ruta = construirRutaImagen(tipo, nombreBase, jornada);
+    const maxJornada = obtenerUltimaJornadaConocida();
+    const limiteSuperior = Math.max(maxJornada, 30);
 
-    const cacheEntry = imagenCache.get(ruta);
-    if (cacheEntry && Date.now() - cacheEntry.timestamp < 60000) {
-      return cacheEntry.existe ? { ruta, jornada } : null;
+    for (let jornada = limiteSuperior; jornada >= 1; jornada--) {
+      const ruta = construirRutaImagen(tipo, nombreBase, jornada);
+      const cacheEntry = imagenCache.get(ruta);
+      if (cacheEntry && Date.now() - cacheEntry.timestamp < 60000) {
+        if (cacheEntry.existe) return { ruta, jornada };
+        continue;
+      }
+
+      try {
+        const response = await fetch(ruta + "?t=" + Date.now(), { method: 'HEAD', cache: 'no-store' });
+        const existe = response.ok;
+        imagenCache.set(ruta, { existe, timestamp: Date.now() });
+        if (existe) return { ruta, jornada };
+      } catch (e) {
+        imagenCache.set(ruta, { existe: false, timestamp: Date.now() });
+      }
     }
 
-    try {
-      const response = await fetch(ruta + "?t=" + Date.now(), { method: 'HEAD', cache: 'no-store' });
-      const existe = response.ok;
-      imagenCache.set(ruta, { existe, timestamp: Date.now() });
-      return existe ? { ruta, jornada } : null;
-    } catch (e) {
-      imagenCache.set(ruta, { existe: false, timestamp: Date.now() });
-      return null;
-    }
+    return null;
   }
 
   let ultimaImagenResultado = await buscarUltimaImagen('resultado', 'resultado');
