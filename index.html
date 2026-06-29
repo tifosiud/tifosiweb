@@ -76,7 +76,7 @@ border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,.12); border-left:4px solid 
 </div>
 
 <script>
-const clasificacionCache = new Map();
+const imagenCache = new Map();
 
 async function getJSON(url){
   try{
@@ -111,10 +111,49 @@ async function cargarDatos(){
   let resultadosEquipo = await getJSON('data/resultados_equipo.json');
   if(!Array.isArray(resultadosEquipo)) resultadosEquipo = [];
 
-  if(resultadosEquipo.length){
-    let ultimo = resultadosEquipo[resultadosEquipo.length -1];
-    document.getElementById("img").src =
-      "imagenes/j" + ultimo.jornada + "/resultado/j" + ultimo.jornada + "_resultado.png?t=" + Date.now();
+  let jornadasReferencia = [];
+  if (proximo && Number.isInteger(proximo.jornada)) jornadasReferencia.push(proximo.jornada);
+  if (Array.isArray(resultadosEquipo) && resultadosEquipo.length) {
+    let ultimo = resultadosEquipo[resultadosEquipo.length - 1];
+    if (ultimo && Number.isInteger(ultimo.jornada)) jornadasReferencia.push(ultimo.jornada);
+  }
+
+  async function comprobarImagen(ruta) {
+    const cacheEntry = imagenCache.get(ruta);
+    if (cacheEntry && cacheEntry.existe && Date.now() - cacheEntry.timestamp < 60000) {
+      return true;
+    }
+
+    return new Promise((resolve) => {
+      let img = new Image();
+      img.onload = () => {
+        imagenCache.set(ruta, { existe: true, timestamp: Date.now() });
+        resolve(true);
+      };
+      img.onerror = () => {
+        imagenCache.set(ruta, { existe: false, timestamp: Date.now() });
+        resolve(false);
+      };
+      img.src = ruta + "?t=" + Date.now();
+    });
+  }
+
+  async function buscarUltimaImagen(tipo, nombreBase) {
+    let maxJornada = jornadasReferencia.length ? Math.max(...jornadasReferencia, 30) : 30;
+    for (let jornada = maxJornada; jornada >= 1; jornada--) {
+      let ruta = `imagenes/j${jornada}/${tipo}/j${jornada}_${nombreBase}.png`;
+      let existe = await comprobarImagen(ruta);
+      if (existe) return { ruta, jornada };
+    }
+    return null;
+  }
+
+  let ultimaImagenResultado = await buscarUltimaImagen('resultado', 'resultado');
+  let imgResultado = document.getElementById("img");
+  if (ultimaImagenResultado) {
+    imgResultado.src = ultimaImagenResultado.ruta + "?t=" + Date.now();
+  } else {
+    imgResultado.src = "";
   }
 
   let ul = document.getElementById("equipo");
@@ -148,50 +187,18 @@ async function cargarDatos(){
   let cont = document.getElementById("clasificacion");
   cont.innerHTML = "Cargando clasificación...";
 
-  // Función para intentar cargar una imagen (con promesa)
-  function intentarCargarImagen(ruta) {
-    const cacheEntry = clasificacionCache.get(ruta);
-    if (cacheEntry && cacheEntry.existe && Date.now() - cacheEntry.timestamp < 60000) {
-      return Promise.resolve(true);
-    }
-
-    return new Promise((resolve) => {
-      let img = new Image();
-      img.onload = () => {
-        clasificacionCache.set(ruta, { existe: true, timestamp: Date.now() });
-        resolve(true);
-      };
-      img.onerror = () => {
-        resolve(false);
-      };
-      img.src = ruta + "?t=" + Date.now();
-    });
-  }
-
   // Buscar la última imagen de clasificación disponible, empezando por la jornada conocida
   let imagenMostrada = false;
-  let jornadasReferencia = [];
-  if (proximo && Number.isInteger(proximo.jornada)) jornadasReferencia.push(proximo.jornada);
-  if (Array.isArray(resultadosEquipo) && resultadosEquipo.length) {
-    let ultimo = resultadosEquipo[resultadosEquipo.length - 1];
-    if (ultimo && Number.isInteger(ultimo.jornada)) jornadasReferencia.push(ultimo.jornada);
-  }
-  let ultimaJornada = jornadasReferencia.length ? Math.max(...jornadasReferencia, 30) : 30;
-
-  for (let jornada = ultimaJornada; jornada >= 1; jornada--) {
-    let imgClasPath = `imagenes/j${jornada}/clasificacion/j${jornada}_clasificacion.png`;
-    let existe = await intentarCargarImagen(imgClasPath);
-    if (existe) {
-      cont.innerHTML = "";
-      let img = document.createElement("img");
-      img.src = imgClasPath + "?t=" + Date.now();
-      img.alt = "Clasificación";
-      img.style.width = "100%";
-      img.style.borderRadius = "12px";
-      cont.appendChild(img);
-      imagenMostrada = true;
-      break;
-    }
+  let ultimaImagenClasificacion = await buscarUltimaImagen('clasificacion', 'clasificacion');
+  if (ultimaImagenClasificacion) {
+    cont.innerHTML = "";
+    let img = document.createElement("img");
+    img.src = ultimaImagenClasificacion.ruta + "?t=" + Date.now();
+    img.alt = "Clasificación";
+    img.style.width = "100%";
+    img.style.borderRadius = "12px";
+    cont.appendChild(img);
+    imagenMostrada = true;
   }
 
   // Si no se encontró imagen, mostrar tabla
