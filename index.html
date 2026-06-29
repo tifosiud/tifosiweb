@@ -122,39 +122,33 @@ async function cargarDatos(buscarClasificacion = false){
     if (ultimo && Number.isInteger(ultimo.jornada)) jornadasReferencia.push(ultimo.jornada);
   }
 
-  async function comprobarImagen(ruta) {
+  function obtenerUltimaJornadaConocida() {
+    const maxJornada = jornadasReferencia.length ? Math.max(...jornadasReferencia) : 0;
+    return Math.max(maxJornada, 1);
+  }
+
+  function construirRutaImagen(tipo, nombreBase, jornada) {
+    return `imagenes/j${jornada}/${tipo}/j${jornada}_${nombreBase}.png`;
+  }
+
+  async function buscarUltimaImagen(tipo, nombreBase) {
+    const jornada = obtenerUltimaJornadaConocida();
+    const ruta = construirRutaImagen(tipo, nombreBase, jornada);
+
     const cacheEntry = imagenCache.get(ruta);
     if (cacheEntry && Date.now() - cacheEntry.timestamp < 60000) {
-      return cacheEntry.existe;
+      return cacheEntry.existe ? { ruta, jornada } : null;
     }
 
     try {
       const response = await fetch(ruta + "?t=" + Date.now(), { method: 'HEAD', cache: 'no-store' });
       const existe = response.ok;
       imagenCache.set(ruta, { existe, timestamp: Date.now() });
-      return existe;
+      return existe ? { ruta, jornada } : null;
     } catch (e) {
       imagenCache.set(ruta, { existe: false, timestamp: Date.now() });
-      return false;
+      return null;
     }
-  }
-
-  async function buscarUltimaImagen(tipo, nombreBase) {
-    const MAX_JORNADA_BUSQUEDA = 30;
-    const BUSQUEDA_ADELANTE = 5;
-    let maxJornada = jornadasReferencia.length ? Math.max(...jornadasReferencia) : 0;
-    let inicioBusqueda = Math.max(maxJornada + BUSQUEDA_ADELANTE, MAX_JORNADA_BUSQUEDA);
-
-    const rutasProbadas = new Set();
-    for (let jornada = inicioBusqueda; jornada >= 1; jornada--) {
-      let ruta = `imagenes/j${jornada}/${tipo}/j${jornada}_${nombreBase}.png`;
-      if (rutasProbadas.has(ruta)) continue;
-      rutasProbadas.add(ruta);
-
-      const existe = await comprobarImagen(ruta);
-      if (existe) return { ruta, jornada };
-    }
-    return null;
   }
 
   let ultimaImagenResultado = await buscarUltimaImagen('resultado', 'resultado');
