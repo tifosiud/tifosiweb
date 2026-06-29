@@ -1,7 +1,9 @@
 import atexit
+import asyncio
 import json
 import os
 import re
+import subprocess
 import sys
 from telegram.ext import Application, MessageHandler, filters, CommandHandler
 from parser import parse_resultado, parse_clasificacion_image
@@ -9,8 +11,25 @@ from image_generator import generar, generar_proximo, generar_clasificacion
 
 TOKEN = "8768812473:AAGKL-wV_vCm0_poBml5MIxpQO5s55Vm9Sc"
 PID_FILE = os.path.join("tmp", "bot.pid")
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 print("🚀 Iniciando bot...")
+
+
+def actualizar_git():
+    try:
+        subprocess.run(["git", "add", "data", "imagenes"], cwd=ROOT_DIR, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        result = subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=ROOT_DIR, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if result.returncode != 0:
+            subprocess.run(["git", "commit", "-m", "update web"], cwd=ROOT_DIR, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            subprocess.run(["git", "push"], cwd=ROOT_DIR, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            print("✅ Git actualizado")
+        else:
+            print("ℹ️ No hay cambios para publicar")
+    except subprocess.CalledProcessError as e:
+        print("⚠️ Error al actualizar Git:", e.stderr.decode().strip() or e)
+    except Exception as e:
+        print("⚠️ Error inesperado al actualizar Git:", e)
 
 
 def ensure_single_instance():
@@ -72,6 +91,7 @@ async def manejar_texto(update, context):
                 json.dump(datos, f, indent=2)
 
             await update.message.reply_photo(photo=open(ruta_img, "rb"))
+            await asyncio.to_thread(actualizar_git)
 
         # =========================
         # C → RESULTADOS LIGA
@@ -135,16 +155,10 @@ async def manejar_texto(update, context):
             with open(ruta_img, "rb") as photo:
                 await update.message.reply_photo(photo=photo)
             await update.message.reply_text("Próximo partido actualizado ✅")
+            await asyncio.to_thread(actualizar_git)
 
         else:
             await update.message.reply_text("Formato no reconocido")
-
-        # =========================
-        # AUTO UPDATE WEB (SEGURA)
-        # =========================
-        os.system("git add .")
-        os.system('git diff --cached --quiet || git commit -m "update web"')
-        os.system("git push")
 
     except Exception as e:
         print("❌ Error:", e)
@@ -191,6 +205,7 @@ async def manejar_foto(update, context):
             await update.message.reply_photo(photo=photo)
 
     await update.message.reply_text("Clasificación actualizada ✅")
+    await asyncio.to_thread(actualizar_git)
 
 
 if not ensure_single_instance():
