@@ -4,5 +4,6 @@ pip install -r requirements.txt
 
 ______
 
+cerrar instancia anterior si existe - pkill -f "python main.py" || true
 abrir sin cerrar - nohup python main.py &
 abrir bot - python main.py

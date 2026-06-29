@@ -1,13 +1,50 @@
+import atexit
 import json
 import os
 import re
+import sys
 from telegram.ext import Application, MessageHandler, filters, CommandHandler
 from parser import parse_resultado, parse_clasificacion_image
 from image_generator import generar, generar_proximo, generar_clasificacion
 
 TOKEN = "8768812473:AAGKL-wV_vCm0_poBml5MIxpQO5s55Vm9Sc"
+PID_FILE = os.path.join("tmp", "bot.pid")
 
 print("🚀 Iniciando bot...")
+
+
+def ensure_single_instance():
+    os.makedirs("tmp", exist_ok=True)
+
+    if os.path.exists(PID_FILE):
+        try:
+            with open(PID_FILE, "r", encoding="utf-8") as f:
+                pid = int(f.read().strip())
+            if pid > 0 and os.path.exists(f"/proc/{pid}"):
+                print("⚠️ Ya hay una instancia del bot en ejecución. Se detiene esta copia.")
+                return False
+        except (ValueError, FileNotFoundError):
+            pass
+
+        try:
+            os.remove(PID_FILE)
+        except OSError:
+            pass
+
+    with open(PID_FILE, "w", encoding="utf-8") as f:
+        f.write(str(os.getpid()))
+
+    return True
+
+
+def cleanup_pid_file():
+    try:
+        os.remove(PID_FILE)
+    except FileNotFoundError:
+        pass
+
+
+atexit.register(cleanup_pid_file)
 
 
 async def start(update, context):
@@ -155,6 +192,9 @@ async def manejar_foto(update, context):
 
     await update.message.reply_text("Clasificación actualizada ✅")
 
+
+if not ensure_single_instance():
+    sys.exit(0)
 
 app = Application.builder().token(TOKEN).build()
 app.add_handler(CommandHandler("start", start))

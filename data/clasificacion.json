@@ -31,7 +31,7 @@
   },
   {
     "pos": 4,
-    "equipo": "Snowy Suprims Fc",
+    "equipo": "Snowy Suprims Fe",
     "pts": 31,
     "pj": 19,
     "g": 10,
@@ -63,8 +63,8 @@
     "pos": 7,
     "equipo": "Deportivo De La Pez...",
     "pts": 19,
-    "pj": 19,
-    "g": 9,
+    "pj": 419,
+    "g": 5,
     "e": 4,
     "p": 10,
     "dif": 0
@@ -86,16 +86,6 @@
     "pj": 19,
     "g": 4,
     "e": 5,
-    "p": 10,
-    "dif": 0
-  },
-  {
-    "pos": 10,
-    "equipo": "Vigaros Fc",
-    "pts": 17,
-    "pj": 19,
-    "g": 4,
-    "e": 9,
     "p": 10,
     "dif": 0
   },
