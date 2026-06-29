@@ -6,8 +6,13 @@ import re
 import subprocess
 import sys
 from telegram.ext import Application, MessageHandler, filters, CommandHandler
-from parser import parse_resultado, parse_clasificacion_image
-from image_generator import generar, generar_proximo, generar_clasificacion
+from secciones.resultados import parse_resultado
+from secciones.clasificacion import parse_clasificacion_image
+from secciones.proximo_partido import parse_proximo_partido
+from secciones.resultados_jornada import cargar_resultados_jornada, guardar_resultados_jornada
+from secciones.resultados_imagen import generar
+from secciones.proximo_partido_imagen import generar_proximo
+from secciones.clasificacion_imagen import generar_clasificacion
 
 TOKEN = "8768812473:AAGKL-wV_vCm0_poBml5MIxpQO5s55Vm9Sc"
 PID_FILE = os.path.join("tmp", "bot.pid")
@@ -98,12 +103,9 @@ async def manejar_texto(update, context):
         # =========================
         elif tipo == "C":
             data = parse_resultado(texto[2:])
-
-            with open("data/resultados_liga.json", "r+") as f:
-                liga = json.load(f)
-                liga.append(data)
-                f.seek(0)
-                json.dump(liga, f, indent=2)
+            liga = cargar_resultados_jornada("data/resultados_liga.json")
+            liga.append(data)
+            guardar_resultados_jornada(liga, "data/resultados_liga.json")
 
             await update.message.reply_text("Resultado de liga guardado ✅")
 
@@ -122,31 +124,7 @@ async def manejar_texto(update, context):
         # P → PRÓXIMO PARTIDO
         # =========================
         elif tipo == "P":
-            match = re.match(r'P\s+J(\d+)\s+(.+?)\s+vs\s+(.+?)\s+(\d{1,2}:\d{2})(?:\s+(.+))?$', texto, re.I)
-            if not match:
-                raise ValueError("Formato de próximo partido no reconocido")
-
-            jornada = int(match.group(1))
-            local = match.group(2)
-            visitante = match.group(3)
-            hora = match.group(4)
-            ubicacion = match.group(5) or "CDM MARGOT MOLES, VICALVARO"
-
-            with open("data/jornadas.json", "r") as f:
-                jornadas = json.load(f)
-
-            fecha = jornadas.get(str(jornada), "Fecha no definida")
-
-            #COMENTARIO
-
-            proximo_data = {
-                "jornada": jornada,
-                "fecha": fecha,
-                "hora": hora,
-                "local": local,
-                "visitante": visitante,
-                "ubicacion": ubicacion
-            }
+            proximo_data = parse_proximo_partido(texto)
 
             with open("data/proximo.json", "w") as f:
                 json.dump(proximo_data, f, indent=2)
