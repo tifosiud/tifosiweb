@@ -77,6 +77,8 @@ border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,.12); border-left:4px solid 
 
 <script>
 const imagenCache = new Map();
+let ultimaImagenClasificacion = null;
+let clasificacionBuscada = false;
 
 async function getJSON(url){
   try{
@@ -120,8 +122,8 @@ async function cargarDatos(){
 
   async function comprobarImagen(ruta) {
     const cacheEntry = imagenCache.get(ruta);
-    if (cacheEntry && cacheEntry.existe && Date.now() - cacheEntry.timestamp < 60000) {
-      return true;
+    if (cacheEntry && Date.now() - cacheEntry.timestamp < 60000) {
+      return cacheEntry.existe;
     }
 
     return new Promise((resolve) => {
@@ -139,9 +141,10 @@ async function cargarDatos(){
   }
 
   async function buscarUltimaImagen(tipo, nombreBase) {
-    const MAX_JORNADA_BUSQUEDA = 50;
+    const MAX_JORNADA_BUSQUEDA = 30;
+    const BUSQUEDA_ADELANTE = 5;
     let maxJornada = jornadasReferencia.length ? Math.max(...jornadasReferencia) : 0;
-    let inicioBusqueda = Math.max(maxJornada, MAX_JORNADA_BUSQUEDA);
+    let inicioBusqueda = Math.max(maxJornada + BUSQUEDA_ADELANTE, MAX_JORNADA_BUSQUEDA);
 
     for (let jornada = inicioBusqueda; jornada >= 1; jornada--) {
       let ruta = `imagenes/j${jornada}/${tipo}/j${jornada}_${nombreBase}.png`;
@@ -190,9 +193,13 @@ async function cargarDatos(){
   let cont = document.getElementById("clasificacion");
   cont.innerHTML = "Cargando clasificación...";
 
-  // Buscar la última imagen de clasificación disponible, empezando por la jornada conocida
+  // Solo buscar la última imagen de clasificación la primera vez que carga la página
   let imagenMostrada = false;
-  let ultimaImagenClasificacion = await buscarUltimaImagen('clasificacion', 'clasificacion');
+  if (!clasificacionBuscada) {
+    clasificacionBuscada = true;
+    ultimaImagenClasificacion = await buscarUltimaImagen('clasificacion', 'clasificacion');
+  }
+
   if (ultimaImagenClasificacion) {
     cont.innerHTML = "";
     let img = document.createElement("img");
