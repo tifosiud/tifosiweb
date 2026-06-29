@@ -77,6 +77,8 @@ border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,.12); border-left:4px solid 
 
 <script>
 const imagenCache = new Map();
+let ultimaImagenResultado = null;
+let resultadoBuscado = false;
 let ultimaImagenClasificacion = null;
 let clasificacionBuscada = false;
 let imgClasificacionElement = null;
@@ -92,7 +94,7 @@ async function getJSON(url){
   }
 }
 
-async function cargarDatos(buscarClasificacion = false){
+async function cargarDatos(){
 
   // PROXIMO
   let proximo = await getJSON('data/proximo.json');
@@ -122,18 +124,12 @@ async function cargarDatos(buscarClasificacion = false){
     if (ultimo && Number.isInteger(ultimo.jornada)) jornadasReferencia.push(ultimo.jornada);
   }
 
-  function obtenerUltimaJornadaConocida() {
-    const maxJornada = jornadasReferencia.length ? Math.max(...jornadasReferencia) : 0;
-    return Math.max(maxJornada, 1);
-  }
-
   function construirRutaImagen(tipo, nombreBase, jornada) {
     return `imagenes/j${jornada}/${tipo}/j${jornada}_${nombreBase}.png`;
   }
 
   async function buscarUltimaImagen(tipo, nombreBase) {
-    const maxJornada = obtenerUltimaJornadaConocida();
-    const limiteSuperior = Math.max(maxJornada, 30);
+    const limiteSuperior = 100;
 
     for (let jornada = limiteSuperior; jornada >= 1; jornada--) {
       const ruta = construirRutaImagen(tipo, nombreBase, jornada);
@@ -156,8 +152,12 @@ async function cargarDatos(buscarClasificacion = false){
     return null;
   }
 
-  let ultimaImagenResultado = await buscarUltimaImagen('resultado', 'resultado');
   let imgResultado = document.getElementById("img");
+  if (!resultadoBuscado) {
+    resultadoBuscado = true;
+    ultimaImagenResultado = await buscarUltimaImagen('resultado', 'resultado');
+  }
+
   if (ultimaImagenResultado) {
     imgResultado.src = ultimaImagenResultado.ruta + "?t=" + Date.now();
   } else {
