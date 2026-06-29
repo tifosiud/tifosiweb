@@ -76,6 +76,8 @@ border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,.1);}
 </div>
 
 <script>
+const clasificacionCache = new Map();
+
 async function getJSON(url){
   try{
     let r = await fetch(url + "?t=" + Date.now());
@@ -148,17 +150,36 @@ async function cargarDatos(){
 
   // Función para intentar cargar una imagen (con promesa)
   function intentarCargarImagen(ruta) {
+    const cacheEntry = clasificacionCache.get(ruta);
+    if (cacheEntry && Date.now() - cacheEntry.timestamp < 60000) {
+      return Promise.resolve(cacheEntry.existe);
+    }
+
     return new Promise((resolve) => {
       let img = new Image();
-      img.onload = () => resolve(true);
-      img.onerror = () => resolve(false);
+      img.onload = () => {
+        clasificacionCache.set(ruta, { existe: true, timestamp: Date.now() });
+        resolve(true);
+      };
+      img.onerror = () => {
+        clasificacionCache.set(ruta, { existe: false, timestamp: Date.now() });
+        resolve(false);
+      };
       img.src = ruta + "?t=" + Date.now();
     });
   }
 
-  // Buscar la última imagen de clasificación disponible (búsqueda secuencial inversa)
+  // Buscar la última imagen de clasificación disponible, empezando por la jornada conocida
   let imagenMostrada = false;
-  for (let jornada = 50; jornada >= 1; jornada--) {
+  let jornadasReferencia = [];
+  if (proximo && Number.isInteger(proximo.jornada)) jornadasReferencia.push(proximo.jornada);
+  if (Array.isArray(resultadosEquipo) && resultadosEquipo.length) {
+    let ultimo = resultadosEquipo[resultadosEquipo.length - 1];
+    if (ultimo && Number.isInteger(ultimo.jornada)) jornadasReferencia.push(ultimo.jornada);
+  }
+  let ultimaJornada = jornadasReferencia.length ? Math.max(...jornadasReferencia) : 20;
+
+  for (let jornada = ultimaJornada; jornada >= 1; jornada--) {
     let imgClasPath = `imagenes/j${jornada}/clasificacion/j${jornada}_clasificacion.png`;
     let existe = await intentarCargarImagen(imgClasPath);
     if (existe) {
