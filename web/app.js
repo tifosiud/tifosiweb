@@ -2,6 +2,7 @@ import { getJSON, buscarUltimaImagenInterna } from '/front/data_loader.js';
 import { abbreviateTeam, renderList, showPlaceholder } from '/front/renderers.js';
 
 let cargandoDatos = false;
+let imagenesInicializadas = false;
 const previousState = {
   proximo: null,
   resultadosEquipo: null,
@@ -128,10 +129,10 @@ async function cargarDatos() {
   const clas = await getJSON('/data/clasificacion.json');
   const contClasificacion = document.getElementById('clasificacion');
 
-  const ultimaImagenResultado = await buscarUltimaImagenInterna('resultado');
-  const imgResultado = document.getElementById('img');
-  const resultadoRuta = ultimaImagenResultado?.ruta || null;
-  if (resultadoRuta !== previousState.ultimaImagenResultadoRuta) {
+  if (!imagenesInicializadas) {
+    const ultimaImagenResultado = await buscarUltimaImagenInterna('resultado');
+    const imgResultado = document.getElementById('img');
+    const resultadoRuta = ultimaImagenResultado?.ruta || null;
     previousState.ultimaImagenResultadoRuta = resultadoRuta;
     if (resultadoRuta) {
       actualizarImagen(imgResultado, resultadoRuta, contClasificacion, 'No hay resultado disponible');
@@ -140,24 +141,17 @@ async function cargarDatos() {
       imgResultado.removeAttribute('src');
       showPlaceholder(contClasificacion, 'No hay resultado disponible');
     }
-  }
 
-  const ultimaImagenClasificacion = await buscarUltimaImagenInterna('clasificacion');
-  const clasificacionRuta = ultimaImagenClasificacion?.ruta || null;
-  if (clasificacionRuta !== previousState.ultimaImagenClasificacionRuta) {
+    const ultimaImagenClasificacion = await buscarUltimaImagenInterna('clasificacion');
+    const clasificacionRuta = ultimaImagenClasificacion?.ruta || null;
     previousState.ultimaImagenClasificacionRuta = clasificacionRuta;
-
     if (clasificacionRuta) {
-      if (actualizarClasificacionImagen(contClasificacion, clasificacionRuta)) {
-        return;
-      }
+      actualizarClasificacionImagen(contClasificacion, clasificacionRuta);
     } else {
       contClasificacion.innerHTML = '';
     }
-  }
 
-  if (clasificacionRuta) {
-    return;
+    imagenesInicializadas = true;
   }
 
   if (!datosIguales(clas, previousState.clas)) {
