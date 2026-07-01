@@ -6,6 +6,8 @@ from pathlib import Path
 import sys
 from pathlib import Path
 
+from PIL import Image, ImageDraw
+
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -14,6 +16,7 @@ from src.secciones.resultados import parse_resultado
 from src.secciones.clasificacion import parse_clasificacion_text
 from src.secciones.resultados_jornada import guardar_resultados_jornada, cargar_resultados_jornada
 from src.secciones.ultimo_resultado import find_latest_result_asset
+from src.processing.ocr import preprocess_image, leer_imagen
 
 
 class TestSectionModules(unittest.TestCase):
@@ -49,6 +52,40 @@ class TestSectionModules(unittest.TestCase):
 
             latest = find_latest_result_asset(base)
             self.assertEqual(latest, "imagenes/j3/resultado/j3_resultado.png")
+
+    def test_preprocess_image_inverts_dark_background_images(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            path = Path(tmp_dir) / "inverted.png"
+            img = Image.new("L", (100, 100), 20)
+            img.paste(220, (20, 20, 80, 80))
+            img.save(path)
+
+            processed = preprocess_image(path)
+            bbox = processed.getbbox()
+
+            self.assertIsNotNone(bbox)
+            self.assertEqual(processed.getpixel((5, 5)), 0)
+            self.assertEqual(processed.getpixel((50, 50)), 255)
+
+    def test_leer_imagen_reads_table_text_from_light_background(self):
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            path = Path(tmp_dir) / "table.png"
+            img = Image.new("RGB", (280, 160), "white")
+            draw = ImageDraw.Draw(img)
+            for y in range(0, 160, 40):
+                draw.line([(0, y), (280, y)], fill="black", width=1)
+            for x in range(0, 280, 70):
+                draw.line([(x, 0), (x, 160)], fill="black", width=1)
+            draw.text((10, 10), "1 Tifosi", fill="black")
+            draw.text((90, 50), "10 8 1 1 20 5 25", fill="black")
+            draw.text((10, 90), "2 Betis", fill="black")
+            img.save(path)
+
+            text = leer_imagen(path)
+            normalized = text.lower()
+
+            self.assertTrue(len(normalized) > 0)
+            self.assertTrue(any(char.isalpha() for char in normalized) or any(char.isdigit() for char in normalized))
 
 
 if __name__ == "__main__":
