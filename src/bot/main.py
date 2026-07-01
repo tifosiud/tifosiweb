@@ -45,26 +45,16 @@ def actualizar_git():
 def ensure_single_instance():
     PID_FILE.parent.mkdir(parents=True, exist_ok=True)
 
-    existing_pid = None
     if PID_FILE.exists():
         try:
             with PID_FILE.open("r", encoding="utf-8") as f:
-                existing_pid = int(f.read().strip())
+                pid = int(f.read().strip())
+            if pid > 0 and os.path.exists(f"/proc/{pid}"):
+                print("⚠️ Ya hay una instancia del bot en ejecución. Se detiene esta copia.")
+                return False
         except (ValueError, FileNotFoundError):
-            existing_pid = None
+            pass
 
-    if existing_pid and existing_pid > 0:
-        try:
-            os.kill(existing_pid, 0)
-        except ProcessLookupError:
-            existing_pid = None
-        except PermissionError:
-            existing_pid = None
-        else:
-            print("⚠️ Ya hay una instancia del bot en ejecución. Se detiene esta copia.")
-            return False
-
-    if PID_FILE.exists():
         try:
             PID_FILE.unlink()
         except OSError:
