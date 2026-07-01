@@ -10,6 +10,7 @@ const previousState = {
   ultimaImagenResultadoRuta: null,
   ultimaImagenClasificacionRuta: null,
 };
+let clasificacionImgElement = null;
 
 function datosIguales(a, b) {
   return JSON.stringify(a) === JSON.stringify(b);
@@ -45,6 +46,39 @@ function actualizarImagen(imgElement, ruta, container, placeholderMessage) {
   };
 
   preload.src = ruta;
+}
+
+function actualizarClasificacionImagen(container, ruta) {
+  if (!ruta) {
+    if (clasificacionImgElement) {
+      clasificacionImgElement.remove();
+      clasificacionImgElement = null;
+    }
+    return false;
+  }
+
+  if (previousState.ultimaImagenClasificacionRuta === ruta && clasificacionImgElement) {
+    return true;
+  }
+
+  const preload = new Image();
+  preload.onload = () => {
+    const nuevaImagen = document.createElement('img');
+    nuevaImagen.src = `${ruta}?t=${Date.now()}`;
+    nuevaImagen.alt = 'Clasificación';
+    nuevaImagen.dataset.currentSrc = ruta;
+
+    if (clasificacionImgElement) {
+      container.replaceChild(nuevaImagen, clasificacionImgElement);
+    } else {
+      container.appendChild(nuevaImagen);
+    }
+
+    clasificacionImgElement = nuevaImagen;
+  };
+
+  preload.src = ruta;
+  return true;
 }
 
 async function cargarDatos() {
@@ -112,14 +146,13 @@ async function cargarDatos() {
   const clasificacionRuta = ultimaImagenClasificacion?.ruta || null;
   if (clasificacionRuta !== previousState.ultimaImagenClasificacionRuta) {
     previousState.ultimaImagenClasificacionRuta = clasificacionRuta;
-    contClasificacion.innerHTML = '';
 
     if (clasificacionRuta) {
-      const imgClasificacion = document.createElement('img');
-      imgClasificacion.src = `${clasificacionRuta}?t=${Date.now()}`;
-      imgClasificacion.alt = 'Clasificación';
-      contClasificacion.appendChild(imgClasificacion);
-      return;
+      if (actualizarClasificacionImagen(contClasificacion, clasificacionRuta)) {
+        return;
+      }
+    } else {
+      contClasificacion.innerHTML = '';
     }
   }
 
