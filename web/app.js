@@ -180,9 +180,9 @@ async function cargarDatos() {
         table.appendChild(row);
       });
 
-      contClasificacion.appendChild(table);
+      clasificacionContainer.appendChild(table);
     } else {
-      showPlaceholder(contClasificacion, 'No hay clasificación disponible');
+      showPlaceholder(clasificacionContainer, 'No hay clasificación disponible');
     }
   }
 }
