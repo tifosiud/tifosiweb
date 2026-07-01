@@ -36,7 +36,7 @@ function actualizarImagen(imgElement, ruta, container = null, placeholderMessage
 
   const preload = new Image();
   preload.onload = () => {
-    imgElement.src = `${ruta}?t=${Date.now()}`;
+    imgElement.src = ruta;
     imgElement.dataset.currentSrc = ruta;
     imgElement.style.display = 'block';
   };
@@ -67,10 +67,7 @@ function actualizarClasificacionImagen(container, ruta) {
   const preload = new Image();
   preload.onload = () => {
     const nuevaImagen = document.createElement('img');
-    nuevaImagen.src = `${ruta}?t=${Date.now()}`;
-    nuevaImagen.alt = 'Clasificación';
-    nuevaImagen.dataset.currentSrc = ruta;
-
+      nuevaImagen.src = ruta;
     if (clasificacionImgElement) {
       container.replaceChild(nuevaImagen, clasificacionImgElement);
     } else {
