@@ -22,7 +22,12 @@ from src.secciones.resultados_imagen import generar
 from src.secciones.proximo_partido_imagen import generar_proximo
 from src.secciones.clasificacion_imagen import generar_clasificacion
 
-TOKEN = "8768812473:AAGKL-wV_vCm0_poBml5MIxpQO5s55Vm9Sc"
+TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN") or os.environ.get("BOT_TOKEN")
+if not TOKEN:
+    print("❌ No se encontró la variable de entorno TELEGRAM_BOT_TOKEN ni BOT_TOKEN.")
+    print("Define el token y vuelve a ejecutar: export TELEGRAM_BOT_TOKEN=tu_nuevo_token")
+    sys.exit(1)
+
 PID_FILE = ROOT_DIR / "tmp" / "bot.pid"
 
 print("🚀 Iniciando bot...")
@@ -230,29 +235,43 @@ def cleanup_webhook():
         print("⚠️ No se pudo limpiar el webhook:", e)
 
 
+def wait_for_telegram_get_updates(max_wait_seconds: int = 60, interval_seconds: int = 3) -> bool:
+    import urllib.request
+    import urllib.error
+    import json
+
+    deadline = time.monotonic() + max_wait_seconds
+    while time.monotonic() < deadline:
+        try:
+            with urllib.request.urlopen(
+                f'https://api.telegram.org/bot{TOKEN}/getUpdates?timeout=0', timeout=15
+            ) as response:
+                data = json.load(response)
+            if data.get("ok"):
+                print("✅ Telegram acepta getUpdates. El bot puede arrancar.")
+                return True
+        except urllib.error.HTTPError as error:
+            body = error.read().decode("utf-8", errors="ignore")
+            if error.code == 409 or "Conflict" in body:
+                print("⚠️ Otro getUpdates está activo. Esperando antes de iniciar el bot...")
+                time.sleep(interval_seconds)
+                continue
+            print("⚠️ Error HTTP al comprobar getUpdates:", error.code, body)
+            time.sleep(interval_seconds)
+        except Exception as error:
+            print("⚠️ Error de red al comprobar getUpdates:", error)
+            time.sleep(interval_seconds)
+
+    print(f"❌ No se pudo obtener acceso exclusivo a getUpdates tras {max_wait_seconds} segundos.")
+    return False
+
+
 app.add_error_handler(manejar_error)
 
 print("✅ Bot listo para arrancar")
 
 cleanup_webhook()
+if not wait_for_telegram_get_updates():
+    sys.exit(1)
 
-# Crear un event loop válido en el hilo principal antes de iniciar el polling.
-loop = asyncio.new_event_loop()
-asyncio.set_event_loop(loop)
-
-max_intentos = 10
-for intento in range(1, max_intentos + 1):
-    try:
-        print(f"🔄 Intento de arranque del bot {intento}/{max_intentos}")
-        app.run_polling(bootstrap_retries=0, stop_signals=None, drop_pending_updates=True)
-        break
-    except telegram.error.Conflict as e:
-        print("⚠️ Conflicto de Telegram en el polling:", e)
-        if intento == max_intentos:
-            raise
-        wait_segundos = 15
-        print(f"⏳ Reintentando en {wait_segundos} segundos...")
-        time.sleep(wait_segundos)
-    except Exception as e:
-        print("❌ Error inesperado al arrancar el polling:", e)
-        raise
+app.run_polling(bootstrap_retries=0, stop_signals=None, drop_pending_updates=True)
