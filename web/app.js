@@ -84,30 +84,59 @@ function actualizarClasificacionImagen(container, ruta) {
   return true;
 }
 
-async function cargarDatos() {
+async function inicializarImagenes() {
+  if (imagenesInicializadas) return;
+
   const proximo = await getJSON('/data/proximo.json');
   const imgProximo = document.getElementById('img-proximo');
   const proximoContainer = document.getElementById('proximo');
 
-  if (!datosIguales(proximo, previousState.proximo)) {
+  if (proximo && proximo.jornada) {
+    actualizarImagen(
+      imgProximo,
+      `/imagenes/j${proximo.jornada}/info/j${proximo.jornada}_info.png`,
+      proximoContainer,
+      'No hay próximo partido definido'
+    );
     previousState.proximo = proximo;
-
-    if (proximo && proximo.jornada) {
-      actualizarImagen(
-        imgProximo,
-        `/imagenes/j${proximo.jornada}/info/j${proximo.jornada}_info.png`,
-        proximoContainer,
-        'No hay próximo partido definido'
-      );
-    } else {
-      imgProximo.style.display = 'none';
-      imgProximo.removeAttribute('src');
-      showPlaceholder(proximoContainer, 'No hay próximo partido definido');
-    }
+  } else {
+    imgProximo.style.display = 'none';
+    imgProximo.removeAttribute('src');
+    showPlaceholder(proximoContainer, 'No hay próximo partido definido');
   }
 
-  const resultadosEquipo = await getJSON('/data/resultados_equipo.json');
+  const ultimaImagenResultado = await buscarUltimaImagenInterna('resultado');
+  const imgResultado = document.getElementById('img');
+  const resultadoContainer = document.getElementById('resultado');
+  const resultadoRuta = ultimaImagenResultado?.ruta || null;
+  previousState.ultimaImagenResultadoRuta = resultadoRuta;
+  if (resultadoRuta) {
+    actualizarImagen(imgResultado, resultadoRuta, resultadoContainer, 'No hay resultado disponible');
+  } else {
+    imgResultado.style.display = 'none';
+    imgResultado.removeAttribute('src');
+    showPlaceholder(resultadoContainer, 'No hay resultado disponible');
+  }
+
+  const ultimaImagenClasificacion = await buscarUltimaImagenInterna('clasificacion');
+  const clasificacionRuta = ultimaImagenClasificacion?.ruta || null;
+  previousState.ultimaImagenClasificacionRuta = clasificacionRuta;
+  if (clasificacionRuta) {
+    const clasificacionImagenContainer = document.getElementById('clasificacion-imagen');
+    actualizarClasificacionImagen(clasificacionImagenContainer, clasificacionRuta);
+  }
+
+  imagenesInicializadas = true;
+}
+
+async function cargarDatos() {
   const ulEquipo = document.getElementById('equipo');
+  const ulLiga = document.getElementById('liga');
+  const resultadosEquipo = await getJSON('/data/resultados_equipo.json');
+  const liga = await getJSON('/data/resultados_liga.json');
+  const clas = await getJSON('/data/clasificacion.json');
+  const clasificacionContainer = document.getElementById('clasificacion');
+
   if (!datosIguales(resultadosEquipo, previousState.resultadosEquipo)) {
     previousState.resultadosEquipo = resultadosEquipo;
     renderList(
@@ -117,8 +146,6 @@ async function cargarDatos() {
     );
   }
 
-  const liga = await getJSON('/data/resultados_liga.json');
-  const ulLiga = document.getElementById('liga');
   if (!datosIguales(liga, previousState.liga)) {
     previousState.liga = liga;
     renderList(
@@ -128,37 +155,9 @@ async function cargarDatos() {
     );
   }
 
-  const clas = await getJSON('/data/clasificacion.json');
-  const contClasificacion = document.getElementById('clasificacion');
-
-  if (!imagenesInicializadas) {
-    const ultimaImagenResultado = await buscarUltimaImagenInterna('resultado');
-    const imgResultado = document.getElementById('img');
-    const resultadoRuta = ultimaImagenResultado?.ruta || null;
-    previousState.ultimaImagenResultadoRuta = resultadoRuta;
-    if (resultadoRuta) {
-      actualizarImagen(imgResultado, resultadoRuta, null, 'No hay resultado disponible');
-    } else {
-      imgResultado.style.display = 'none';
-      imgResultado.removeAttribute('src');
-      showPlaceholder(contClasificacion, 'No hay resultado disponible');
-    }
-
-    const ultimaImagenClasificacion = await buscarUltimaImagenInterna('clasificacion');
-    const clasificacionRuta = ultimaImagenClasificacion?.ruta || null;
-    previousState.ultimaImagenClasificacionRuta = clasificacionRuta;
-    if (clasificacionRuta) {
-      actualizarClasificacionImagen(contClasificacion, clasificacionRuta);
-    } else {
-      contClasificacion.innerHTML = '';
-    }
-
-    imagenesInicializadas = true;
-  }
-
   if (!datosIguales(clas, previousState.clas)) {
     previousState.clas = clas;
-    contClasificacion.innerHTML = '';
+    clasificacionContainer.innerHTML = '';
 
     if (Array.isArray(clas) && clas.length) {
       const sortedClas = [...clas].sort((a, b) => b.pts - a.pts);
@@ -202,4 +201,10 @@ async function iniciarRefresco() {
   }
 }
 
-window.addEventListener('DOMContentLoaded', iniciarRefresco);
+async function iniciarApp() {
+  await inicializarImagenes();
+  await cargarDatos();
+  iniciarRefresco();
+}
+
+window.addEventListener('DOMContentLoaded', iniciarApp);
