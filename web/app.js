@@ -1,5 +1,5 @@
-import { getJSON, buscarUltimaImagenInterna } from './front/data_loader.js';
-import { abbreviateTeam, renderList, showPlaceholder } from './front/renderers.js';
+import { getJSON, buscarUltimaImagenInterna } from '/front/data_loader.js';
+import { abbreviateTeam, renderList, showPlaceholder } from '/front/renderers.js';
 
 let cargandoDatos = false;
 let resultadoBuscado = false;
@@ -8,12 +8,12 @@ let ultimaImagenResultado = null;
 let ultimaImagenClasificacion = null;
 
 async function cargarDatos() {
-  const proximo = await getJSON("data/proximo.json");
+  const proximo = await getJSON("/data/proximo.json");
   const imgProximo = document.getElementById("img-proximo");
   const proximoContainer = document.getElementById("proximo");
 
   if (proximo && proximo.jornada) {
-    imgProximo.src = `imagenes/j${proximo.jornada}/info/j${proximo.jornada}_info.png?t=${Date.now()}`;
+    imgProximo.src = `/imagenes/j${proximo.jornada}/info/j${proximo.jornada}_info.png?t=${Date.now()}`;
     imgProximo.style.display = "block";
   } else {
     imgProximo.style.display = "none";
@@ -21,7 +21,7 @@ async function cargarDatos() {
     showPlaceholder(proximoContainer, "No hay próximo partido definido");
   }
 
-  const resultadosEquipo = await getJSON("data/resultados_equipo.json");
+  const resultadosEquipo = await getJSON("/data/resultados_equipo.json");
   const ulEquipo = document.getElementById("equipo");
   renderList(
     ulEquipo,
@@ -29,7 +29,7 @@ async function cargarDatos() {
     (item) => `${item.local} ${item.goles_local}-${item.goles_visitante} ${item.visitante}`
   );
 
-  const liga = await getJSON("data/resultados_liga.json");
+  const liga = await getJSON("/data/resultados_liga.json");
   const ulLiga = document.getElementById("liga");
   renderList(
     ulLiga,
@@ -37,7 +37,7 @@ async function cargarDatos() {
     (item) => `${item.local} ${item.goles_local}-${item.goles_visitante} ${item.visitante}`
   );
 
-  const clas = await getJSON("data/clasificacion.json");
+  const clas = await getJSON("/data/clasificacion.json");
   const contClasificacion = document.getElementById("clasificacion");
   contClasificacion.innerHTML = "";
 

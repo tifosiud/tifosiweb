@@ -1,4 +1,4 @@
-const imageCache = new Map();
+const latestAssetsCache = { promise: null };
 
 export async function getJSON(url) {
   try {
@@ -10,25 +10,21 @@ export async function getJSON(url) {
 }
 
 export async function buscarUltimaImagenInterna(tipo) {
-  for (let jornada = 100; jornada >= 1; jornada--) {
-    const ruta = `imagenes/j${jornada}/${tipo}/j${jornada}_${tipo}.png`;
-    const cacheEntry = imageCache.get(ruta);
-    if (cacheEntry) {
-      return cacheEntry.existe ? { ruta, jornada } : null;
-    }
-
-    try {
-      const img = new Image();
-      const existe = await new Promise((resolve) => {
-        img.onload = () => resolve(true);
-        img.onerror = () => resolve(false);
-        img.src = `${ruta}?t=${Date.now()}`;
-      });
-      imageCache.set(ruta, { existe, timestamp: Date.now() });
-      if (existe) return { ruta, jornada };
-    } catch (error) {
-      imageCache.set(ruta, { existe: false, timestamp: Date.now() });
-    }
+  if (!latestAssetsCache.promise) {
+    latestAssetsCache.promise = getJSON("/last_assets.json");
   }
-  return null;
+
+  const assets = await latestAssetsCache.promise;
+  if (!assets || typeof assets !== "object") {
+    return null;
+  }
+
+  const ruta = assets[tipo];
+  if (typeof ruta !== "string" || !ruta.trim()) {
+    return null;
+  }
+
+  const jornadaMatch = ruta.match(/j(\d+)_/i);
+  const jornada = jornadaMatch ? Number(jornadaMatch[1]) : null;
+  return { ruta: `/${ruta.replace(/^\//, "")}`, jornada };
 }

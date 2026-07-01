@@ -200,14 +200,24 @@ app.add_handler(CommandHandler("start", start))
 app.add_handler(MessageHandler(filters.PHOTO & ~filters.COMMAND, manejar_foto))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, manejar_texto))
 
+
+async def manejar_error(update, context):
+    error = context.error
+    print("⚠️ Error en el bot:", error)
+    if isinstance(error, telegram.error.Conflict):
+        print("⚠️ Conflicto con Telegram (otro proceso está obteniendo updates). Cerrando el proceso.")
+        try:
+            cleanup_pid_file()
+        except Exception:
+            pass
+        os._exit(0)
+
+
+app.add_error_handler(manejar_error)
 print("✅ Bot arrancado correctamente")
 
 try:
-    app.run_polling()
-except telegram.error.Conflict as e:
-    print("⚠️ Conflicto con Telegram (otro proceso está obteniendo updates):", e)
-    print("⚠️ Saliendo sin iniciar el polling para evitar bucle de errores.")
-    sys.exit(0)
+    app.run_polling(bootstrap_retries=0, stop_signals=None)
 except Exception as e:
     print("❌ Error inesperado al arrancar el polling:", e)
     raise
