@@ -206,18 +206,26 @@ async def manejar_error(update, context):
     error = context.error
     print("⚠️ Error en el bot:", error)
     if isinstance(error, telegram.error.Conflict):
-        print("⚠️ Conflicto con Telegram (otro proceso está obteniendo updates). Cerrando el proceso.")
+        print("⚠️ Conflicto con Telegram (otro proceso está obteniendo updates). No se cierra el proceso.")
         try:
             cleanup_pid_file()
         except Exception:
             pass
-        os._exit(0)
+        return
 
 
 def cleanup_webhook():
     try:
-        asyncio.run(app.bot.delete_webhook(drop_pending_updates=True))
-        print("✅ Webhook eliminado y updates pendientes descartados")
+        import urllib.request
+        import urllib.parse
+
+        params = urllib.parse.urlencode({
+            'drop_pending_updates': 'true',
+        })
+        url = f'https://api.telegram.org/bot{TOKEN}/deleteWebhook?{params}'
+        with urllib.request.urlopen(url, timeout=15) as response:
+            data = response.read().decode('utf-8')
+        print("✅ Webhook eliminado y updates pendientes descartados", data)
     except Exception as e:
         print("⚠️ No se pudo limpiar el webhook:", e)
 
@@ -227,6 +235,10 @@ app.add_error_handler(manejar_error)
 print("✅ Bot listo para arrancar")
 
 cleanup_webhook()
+
+# Crear un event loop válido en el hilo principal antes de iniciar el polling.
+loop = asyncio.new_event_loop()
+asyncio.set_event_loop(loop)
 
 max_intentos = 5
 for intento in range(1, max_intentos + 1):
