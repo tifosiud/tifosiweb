@@ -1,5 +1,5 @@
-import { getJSON, buscarUltimaImagenInterna } from './web/front/data_loader.js';
-import { abbreviateTeam, renderList, showPlaceholder } from './web/front/renderers.js';
+import { getJSON, buscarUltimaImagenInterna } from './front/data_loader.js';
+import { abbreviateTeam, renderList, showPlaceholder } from './front/renderers.js';
 
 let cargandoDatos = false;
 let resultadoBuscado = false;

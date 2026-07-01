@@ -7,6 +7,7 @@ import subprocess
 import sys
 from pathlib import Path
 from telegram.ext import Application, MessageHandler, filters, CommandHandler
+import telegram
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 if str(ROOT_DIR) not in sys.path:
@@ -201,4 +202,12 @@ app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, manejar_texto))
 
 print("✅ Bot arrancado correctamente")
 
-app.run_polling()
+try:
+    app.run_polling()
+except telegram.error.Conflict as e:
+    print("⚠️ Conflicto con Telegram (otro proceso está obteniendo updates):", e)
+    print("⚠️ Saliendo sin iniciar el polling para evitar bucle de errores.")
+    sys.exit(0)
+except Exception as e:
+    print("❌ Error inesperado al arrancar el polling:", e)
+    raise

@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from web_assets import build_latest_assets, write_latest_assets
+from src.processing.web_assets import build_latest_assets, write_latest_assets
 
 
 class WebAssetsTests(unittest.TestCase):
