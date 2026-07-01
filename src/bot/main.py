@@ -5,6 +5,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 from pathlib import Path
 from telegram.ext import Application, MessageHandler, filters, CommandHandler
 import telegram
@@ -213,11 +214,33 @@ async def manejar_error(update, context):
         os._exit(0)
 
 
-app.add_error_handler(manejar_error)
-print("✅ Bot arrancado correctamente")
+def cleanup_webhook():
+    try:
+        asyncio.run(app.bot.delete_webhook(drop_pending_updates=True))
+        print("✅ Webhook eliminado y updates pendientes descartados")
+    except Exception as e:
+        print("⚠️ No se pudo limpiar el webhook:", e)
 
-try:
-    app.run_polling(bootstrap_retries=0, stop_signals=None)
-except Exception as e:
-    print("❌ Error inesperado al arrancar el polling:", e)
-    raise
+
+app.add_error_handler(manejar_error)
+
+print("✅ Bot listo para arrancar")
+
+cleanup_webhook()
+
+max_intentos = 5
+for intento in range(1, max_intentos + 1):
+    try:
+        print(f"🔄 Intento de arranque del bot {intento}/{max_intentos}")
+        app.run_polling(bootstrap_retries=0, stop_signals=None, drop_pending_updates=True)
+        break
+    except telegram.error.Conflict as e:
+        print("⚠️ Conflicto de Telegram en el polling:", e)
+        if intento == max_intentos:
+            raise
+        wait_segundos = 8
+        print(f"⏳ Reintentando en {wait_segundos} segundos...")
+        time.sleep(wait_segundos)
+    except Exception as e:
+        print("❌ Error inesperado al arrancar el polling:", e)
+        raise
