@@ -17,7 +17,8 @@ function datosIguales(a, b) {
 
 function actualizarImagen(imgElement, ruta, container, placeholderMessage) {
   if (!ruta) {
-    if (imgElement.src) {
+    if (imgElement.dataset.currentSrc) {
+      imgElement.dataset.currentSrc = '';
       imgElement.style.display = 'none';
       imgElement.removeAttribute('src');
       showPlaceholder(container, placeholderMessage);
@@ -25,11 +26,25 @@ function actualizarImagen(imgElement, ruta, container, placeholderMessage) {
     return;
   }
 
-  if (imgElement.dataset.currentSrc !== ruta) {
+  if (imgElement.dataset.currentSrc === ruta) {
+    return;
+  }
+
+  const preload = new Image();
+  preload.onload = () => {
     imgElement.src = `${ruta}?t=${Date.now()}`;
     imgElement.dataset.currentSrc = ruta;
     imgElement.style.display = 'block';
-  }
+  };
+
+  preload.onerror = () => {
+    if (!imgElement.src) {
+      imgElement.style.display = 'none';
+      showPlaceholder(container, placeholderMessage);
+    }
+  };
+
+  preload.src = ruta;
 }
 
 async function cargarDatos() {
