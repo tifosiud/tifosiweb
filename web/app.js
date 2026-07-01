@@ -17,13 +17,15 @@ function datosIguales(a, b) {
   return JSON.stringify(a) === JSON.stringify(b);
 }
 
-function actualizarImagen(imgElement, ruta, container, placeholderMessage) {
+function actualizarImagen(imgElement, ruta, container = null, placeholderMessage = '') {
   if (!ruta) {
     if (imgElement.dataset.currentSrc) {
       imgElement.dataset.currentSrc = '';
       imgElement.style.display = 'none';
       imgElement.removeAttribute('src');
-      showPlaceholder(container, placeholderMessage);
+      if (container) {
+        showPlaceholder(container, placeholderMessage);
+      }
     }
     return;
   }
@@ -40,7 +42,7 @@ function actualizarImagen(imgElement, ruta, container, placeholderMessage) {
   };
 
   preload.onerror = () => {
-    if (!imgElement.src) {
+    if (!imgElement.src && container) {
       imgElement.style.display = 'none';
       showPlaceholder(container, placeholderMessage);
     }
@@ -135,7 +137,7 @@ async function cargarDatos() {
     const resultadoRuta = ultimaImagenResultado?.ruta || null;
     previousState.ultimaImagenResultadoRuta = resultadoRuta;
     if (resultadoRuta) {
-      actualizarImagen(imgResultado, resultadoRuta, contClasificacion, 'No hay resultado disponible');
+      actualizarImagen(imgResultado, resultadoRuta, null, 'No hay resultado disponible');
     } else {
       imgResultado.style.display = 'none';
       imgResultado.removeAttribute('src');
