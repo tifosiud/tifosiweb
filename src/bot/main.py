@@ -240,7 +240,7 @@ cleanup_webhook()
 loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
 
-max_intentos = 5
+max_intentos = 10
 for intento in range(1, max_intentos + 1):
     try:
         print(f"🔄 Intento de arranque del bot {intento}/{max_intentos}")
@@ -250,7 +250,7 @@ for intento in range(1, max_intentos + 1):
         print("⚠️ Conflicto de Telegram en el polling:", e)
         if intento == max_intentos:
             raise
-        wait_segundos = 8
+        wait_segundos = 15
         print(f"⏳ Reintentando en {wait_segundos} segundos...")
         time.sleep(wait_segundos)
     except Exception as e:
